@@ -1,0 +1,81 @@
+@import "tailwindcss";
+
+:root {
+  color-scheme: dark;
+  --vscode-editor-bg: #1e1e1e;
+  --vscode-sidebar-bg: #252526;
+  --vscode-activitybar-bg: #333333;
+  --vscode-titlebar-bg: #3c3c3c;
+  --vscode-statusbar-bg: #007acc;
+  --vscode-border: #3c3c3c;
+  --vscode-text: #cccccc;
+  --vscode-text-muted: #858585;
+  --vscode-accent: #007acc;
+  --vscode-list-hover: #2a2d2e;
+  --vscode-list-active: #37373d;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  background-color: #1e1e1e;
+  color: #cccccc;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Ubuntu, sans-serif;
+  font-size: 13px;
+}
+
+code,
+pre,
+.font-mono {
+  font-family: Consolas, Menlo, Monaco, "Courier New", monospace;
+}
+
+/* Sharp flat VS Code scrollbars */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(121, 121, 121, 0.35);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(121, 121, 121, 0.55);
+}
+
+/* Checkerboard background for Sprite / Image previewer */
+.checkerboard-bg {
+  background-color: #252526;
+  background-image:
+    linear-gradient(45deg, #2e2e30 25%, transparent 25%),
+    linear-gradient(-45deg, #2e2e30 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #2e2e30 75%),
+    linear-gradient(-45deg, transparent 75%, #2e2e30 75%);
+  background-size: 16px 16px;
+  background-position: 0 0, 0 8px, 8px -8px, -8px 0;
+}
+
+/* Yjs Remote Cursor & Selection styling (dynamic per-client styles injected via JS) */
+.yRemoteSelection {
+  opacity: 0.28;
+}
+.yRemoteSelectionHead {
+  position: relative;
+  border-left: 2px solid;
+  height: 100%;
+}
+.anvil-comment-glyph {
+  background-color: #007acc;
+  width: 4px !important;
+  margin-left: 4px;
+}

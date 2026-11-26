@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 380" width="1100" height="380" role="img" aria-label="Anvil Session Lifecycle Diagram">
+  <defs>
+    <marker id="sArrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#858585" />
+    </marker>
+    <marker id="sArrowRed" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#f48771" />
+    </marker>
+    <marker id="sArrowTeal" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#4ec9b0" />
+    </marker>
+  </defs>
+
+  <rect x="0" y="0" width="1100" height="380" fill="#1e1e1e" />
+  <rect x="0.5" y="0.5" width="1099" height="379" fill="none" stroke="#3c3c3c" />
+
+  <rect x="0" y="0" width="1100" height="42" fill="#252526" />
+  <line x1="0" y1="42" x2="1100" y2="42" stroke="#3c3c3c" />
+  <text x="26" y="27" fill="#ffffff" font-family="system-ui, sans-serif" font-size="15" font-weight="700">
+    Session Lifecycle (Free Mode: ENABLE_PAID_TIERS=false)
+  </text>
+
+  <!-- State 1: Solo Workspace -->
+  <rect x="30" y="130" width="190" height="120" fill="#252526" stroke="#3c3c3c" stroke-width="1.5" />
+  <rect x="30" y="130" width="190" height="4" fill="#569cd6" />
+  <text x="48" y="160" fill="#ffffff" font-family="system-ui, sans-serif" font-size="14" font-weight="700">Solo Workspace</text>
+  <text x="48" y="182" fill="#858585" font-family="system-ui, sans-serif" font-size="11">Owner &amp; permanent</text>
+  <text x="48" y="198" fill="#858585" font-family="system-ui, sans-serif" font-size="11">members edit cloud</text>
+  <text x="48" y="214" fill="#858585" font-family="system-ui, sans-serif" font-size="11">project files privately.</text>
+
+  <line x1="220" y1="190" x2="292" y2="190" stroke="#4ec9b0" stroke-width="2" marker-end="url(#sArrowTeal)" />
+  <text x="256" y="178" text-anchor="middle" fill="#4ec9b0" font-family="Consolas, Menlo, monospace" font-size="10">Start</text>
+
+  <!-- State 2: Active Session -->
+  <rect x="292" y="110" width="236" height="160" fill="#252526" stroke="#2ea043" stroke-width="1.5" />
+  <rect x="292" y="110" width="236" height="4" fill="#2ea043" />
+  <text x="310" y="140" fill="#89d185" font-family="system-ui, sans-serif" font-size="14" font-weight="700">Active Session</text>
+  <text x="310" y="162" fill="#cccccc" font-family="Consolas, Menlo, monospace" font-size="11">status = "active"</text>
+  <text x="310" y="184" fill="#9d9d9d" font-family="system-ui, sans-serif" font-size="11">• 6-char uppercase code issued</text>
+  <text x="310" y="202" fill="#9d9d9d" font-family="system-ui, sans-serif" font-size="11">• Guests join &amp; edit via Yjs</text>
+  <text x="310" y="220" fill="#9d9d9d" font-family="system-ui, sans-serif" font-size="11">• Live preview tokens active</text>
+  <text x="310" y="238" fill="#9d9d9d" font-family="system-ui, sans-serif" font-size="11">• isPersistent = false (free)</text>
+
+  <!-- Path A: Host disconnects -> Grace Timer -->
+  <path d="M 528 150 L 606 114" fill="none" stroke="#858585" stroke-width="2" marker-end="url(#sArrow)" />
+  <text x="564" y="118" text-anchor="middle" fill="#dcdcaa" font-family="Consolas, Menlo, monospace" font-size="10">Host leaves</text>
+
+  <rect x="606" y="68" width="214" height="106" fill="#252526" stroke="#cca700" stroke-width="1.5" />
+  <rect x="606" y="68" width="214" height="4" fill="#cca700" />
+  <text x="622" y="96" fill="#ffd466" font-family="system-ui, sans-serif" font-size="13" font-weight="700">30s Grace Timer</text>
+  <text x="622" y="116" fill="#9d9d9d" font-family="system-ui, sans-serif" font-size="11">Page reload &lt; 30s keeps</text>
+  <text x="622" y="132" fill="#9d9d9d" font-family="system-ui, sans-serif" font-size="11">session alive &amp; cancels</text>
+  <text x="622" y="148" fill="#9d9d9d" font-family="system-ui, sans-serif" font-size="11">the shutdown timer.</text>
+
+  <!-- Reconnect arrow back to Active Session -->
+  <path d="M 606 94 Q 510 50 430 110" fill="none" stroke="#4ec9b0" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#sArrowTeal)" />
+  <text x="514" y="66" text-anchor="middle" fill="#4ec9b0" font-family="Consolas, Menlo, monospace" font-size="10">Host reconnects (&lt; 30s)</text>
+
+  <!-- Path B: End Session directly -->
+  <path d="M 528 232 L 866 232" fill="none" stroke="#f48771" stroke-width="2" marker-end="url(#sArrowRed)" />
+  <text x="698" y="222" text-anchor="middle" fill="#f48771" font-family="Consolas, Menlo, monospace" font-size="10">Host clicks "End Session"</text>
+
+  <!-- Grace expires -> Session Ended -->
+  <path d="M 820 120 L 866 164" fill="none" stroke="#f48771" stroke-width="2" marker-end="url(#sArrowRed)" />
+  <text x="874" y="128" fill="#f48771" font-family="Consolas, Menlo, monospace" font-size="10">30s expires</text>
+
+  <!-- State 3: Session Ended -->
+  <rect x="866" y="120" width="206" height="190" fill="#252526" stroke="#be1100" stroke-width="1.5" />
+  <rect x="866" y="120" width="206" height="4" fill="#be1100" />
+  <text x="884" y="150" fill="#f48771" font-family="system-ui, sans-serif" font-size="14" font-weight="700">Session Ended</text>
+  <text x="884" y="172" fill="#cccccc" font-family="Consolas, Menlo, monospace" font-size="11">status = "ended"</text>
+  <text x="884" y="194" fill="#9d9d9d" font-family="system-ui, sans-serif" font-size="11">1. Flush Yjs edits to SQL</text>
+  <text x="884" y="212" fill="#9d9d9d" font-family="system-ui, sans-serif" font-size="11">2. Invalidate 6-char code</text>
+  <text x="884" y="230" fill="#9d9d9d" font-family="system-ui, sans-serif" font-size="11">3. Revoke preview tokens</text>
+  <text x="884" y="248" fill="#9d9d9d" font-family="system-ui, sans-serif" font-size="11">4. Remove session guests</text>
+  <text x="884" y="266" fill="#9d9d9d" font-family="system-ui, sans-serif" font-size="11">5. Close WS &amp; Socket (403)</text>
+  <text x="884" y="290" fill="#4ec9b0" font-family="system-ui, sans-serif" font-size="10">Permanent members keep access</text>
+
+  <!-- Footer Note -->
+  <rect x="30" y="332" width="1042" height="30" fill="#252526" stroke="#3c3c3c" />
+  <text x="551" y="351" text-anchor="middle" fill="#858585" font-family="Consolas, Menlo, monospace" font-size="11">
+    Paid persistent sessions (isPersistent=true) are scaffolded in schema &amp; canSessionPersist() but disabled when ENABLE_PAID_TIERS=false.
+  </text>
+</svg>

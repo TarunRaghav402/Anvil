@@ -1,0 +1,36 @@
+# Normalize line endings across Windows, macOS, and Linux
+* text=auto
+
+# Keep shell scripts, Git hooks, and config files with LF endings
+*.sh text eol=lf
+.githooks/* text eol=lf
+*.mjs text eol=lf
+*.ts text eol=lf
+*.tsx text eol=lf
+*.json text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.md text eol=lf
+*.svg text eol=lf
+
+# Windows scripts
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+
+# Binary assets (do not alter line endings or diff as text)
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ico binary
+*.wav binary
+*.mp3 binary
+*.ogg binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.otf binary
+*.zip binary
+*.pdf binary

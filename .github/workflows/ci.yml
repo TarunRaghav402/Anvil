@@ -1,0 +1,72 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  gitleaks:
+    name: Secret Scan (Gitleaks)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository with full history
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run Gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_CONFIG: .gitleaks.toml
+
+  build-and-test:
+    name: Lint, Typecheck, Test & Build (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js LTS
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Prepare dummy environment from template
+        run: node -e "require('fs').copyFileSync('.env.example', '.env')"
+
+      - name: Lint workspace
+        run: npm run lint
+
+      - name: Typecheck backend
+        run: npm --workspace=backend run typecheck
+
+      - name: Typecheck frontend
+        run: npm --workspace=frontend run typecheck
+
+      - name: Test backend
+        run: npm --workspace=backend run test
+
+      - name: Test frontend
+        run: npm --workspace=frontend run test
+
+      - name: Build backend
+        run: npm --workspace=backend run build
+
+      - name: Build frontend
+        run: npm --workspace=frontend run build

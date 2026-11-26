@@ -1,0 +1,10 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    // All Anvil asset reads and writes are mediated by the Anvil backend
+    // after verifying Firebase Auth email verification and project membership.
+    match /projects/{projectId}/{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

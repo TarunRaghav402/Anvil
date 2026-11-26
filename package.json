@@ -1,0 +1,58 @@
+{
+  "name": "anvil",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Anvil — real-time collaborative cloud IDE and project workspace styled after VS Code",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/YOUR_USERNAME/anvil.git"
+  },
+  "keywords": [
+    "anvil",
+    "collaborative-ide",
+    "monaco-editor",
+    "yjs",
+    "crdt",
+    "firebase",
+    "dataconnect",
+    "game-dev",
+    "live-server",
+    "typescript"
+  ],
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "workspaces": [
+    "backend",
+    "frontend"
+  ],
+  "scripts": {
+    "dev": "concurrently -k -n EMULATORS,BACKEND,FRONTEND -c yellow,cyan,green \"npm run emulators\" \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:app": "concurrently -k -n BACKEND,FRONTEND -c cyan,green \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "emulators": "node scripts/run-emulators.mjs start",
+    "emulators:exec": "node scripts/run-emulators.mjs exec",
+    "dev:backend": "npm --workspace=backend run dev",
+    "dev:frontend": "npm --workspace=frontend run dev",
+    "build": "npm --workspace=backend run build && npm --workspace=frontend run build",
+    "typecheck": "npm --workspace=backend run typecheck && npm --workspace=frontend run typecheck",
+    "lint": "eslint .",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,mjs,json,md,yml,yaml,css}\"",
+    "secrets:scan": "node scripts/scan-secrets.mjs",
+    "prepare": "node scripts/setup-hooks.mjs",
+    "seed": "npm --workspace=backend run seed",
+    "test": "npm --workspace=backend run test && npm --workspace=frontend run test",
+    "test:e2e": "cross-env USE_FIREBASE_EMULATORS=true node scripts/run-emulators.mjs exec --only auth,storage,dataconnect \"npm --workspace=backend run test:e2e\""
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.4",
+    "concurrently": "^9.1.2",
+    "cross-env": "^7.0.3",
+    "eslint": "^9.39.4",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "firebase-tools": "^15.37.0",
+    "globals": "^17.4.0",
+    "prettier": "^3.8.1",
+    "typescript-eslint": "^8.57.1"
+  }
+}

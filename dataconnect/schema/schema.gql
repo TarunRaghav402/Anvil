@@ -1,0 +1,88 @@
+# Anvil Relational Schema for Firebase SQL Connect (Data Connect / PostgreSQL)
+
+type User @table(name: "users", key: "id") {
+  id: String! @col(name: "id")
+  username: String! @unique @col(name: "username", dataType: "varchar(64)")
+  usernameLower: String! @unique @col(name: "username_lower", dataType: "varchar(64)")
+  email: String! @unique @col(name: "email", dataType: "varchar(255)")
+  planTier: String! @default(value: "free") @col(name: "plan_tier", dataType: "varchar(32)")
+  createdAt: Timestamp! @default(expr: "request.time") @col(name: "created_at")
+}
+
+type Project @table(name: "projects") {
+  id: UUID! @default(expr: "uuidV4()") @col(name: "id")
+  owner: User! @ref(fields: "ownerId", references: "id")
+  ownerId: String! @col(name: "owner_id")
+  name: String! @col(name: "name", dataType: "varchar(120)")
+  githubOriginUrl: String @col(name: "github_origin_url", dataType: "text")
+  defaultBranch: String! @default(value: "main") @col(name: "default_branch", dataType: "varchar(120)")
+  entryFile: String! @default(value: "index.html") @col(name: "entry_file", dataType: "varchar(255)")
+  updatedAt: Timestamp! @default(expr: "request.time") @col(name: "updated_at")
+}
+
+type ProjectMember @table(name: "project_members", key: ["project", "user"]) {
+  project: Project! @ref(fields: "projectId", references: "id")
+  projectId: UUID! @col(name: "project_id")
+  user: User! @ref(fields: "userId", references: "id")
+  userId: String! @col(name: "user_id")
+  addedBy: String! @col(name: "added_by")
+  permanent: Boolean! @default(value: false) @col(name: "permanent")
+  createdAt: Timestamp! @default(expr: "request.time") @col(name: "created_at")
+}
+
+type ProjectNode @table(name: "project_nodes")
+  @index(fields: ["projectId", "parentId"]) {
+  id: UUID! @default(expr: "uuidV4()") @col(name: "id")
+  project: Project! @ref(fields: "projectId", references: "id")
+  projectId: UUID! @col(name: "project_id")
+  parent: ProjectNode @ref(fields: "parentId", references: "id")
+  parentId: UUID @col(name: "parent_id")
+  name: String! @col(name: "name", dataType: "varchar(255)")
+  # Enforces unique (project_id, parent_id, lower(name)) including NULL parent_id
+  uniqueSiblingKey: String! @unique @col(name: "unique_sibling_key", dataType: "text")
+  nodeType: String! @col(name: "node_type", dataType: "varchar(32)")
+  contentText: String @col(name: "content_text", dataType: "text")
+  storagePath: String @col(name: "storage_path", dataType: "text")
+  mimeType: String! @col(name: "mime_type", dataType: "varchar(127)")
+  updatedAt: Timestamp! @default(expr: "request.time") @col(name: "updated_at")
+}
+
+type Session @table(name: "sessions")
+  @index(fields: ["projectId", "status"]) {
+  id: UUID! @default(expr: "uuidV4()") @col(name: "id")
+  project: Project! @ref(fields: "projectId", references: "id")
+  projectId: UUID! @col(name: "project_id")
+  host: User! @ref(fields: "hostId", references: "id")
+  hostId: String! @col(name: "host_id")
+  sessionCode: String! @unique @col(name: "session_code", dataType: "varchar(6)")
+  status: String! @default(value: "active") @col(name: "status", dataType: "varchar(16)")
+  isPersistent: Boolean! @default(value: false) @col(name: "is_persistent")
+  createdAt: Timestamp! @default(expr: "request.time") @col(name: "created_at")
+  endedAt: Timestamp @col(name: "ended_at")
+}
+
+type SessionMember @table(name: "session_members", key: ["session", "user"]) {
+  session: Session! @ref(fields: "sessionId", references: "id")
+  sessionId: UUID! @col(name: "session_id")
+  user: User! @ref(fields: "userId", references: "id")
+  userId: String! @col(name: "user_id")
+  role: String! @col(name: "role", dataType: "varchar(32)")
+  joinedAt: Timestamp! @default(expr: "request.time") @col(name: "joined_at")
+}
+
+type Comment @table(name: "comments")
+  @index(fields: ["projectId", "nodeId"]) {
+  id: UUID! @default(expr: "uuidV4()") @col(name: "id")
+  project: Project! @ref(fields: "projectId", references: "id")
+  projectId: UUID! @col(name: "project_id")
+  node: ProjectNode! @ref(fields: "nodeId", references: "id")
+  nodeId: UUID! @col(name: "node_id")
+  author: User! @ref(fields: "authorId", references: "id")
+  authorId: String! @col(name: "author_id")
+  parentComment: Comment @ref(fields: "parentCommentId", references: "id")
+  parentCommentId: UUID @col(name: "parent_comment_id")
+  lineNumber: Int @col(name: "line_number")
+  body: String! @col(name: "body", dataType: "text")
+  resolved: Boolean! @default(value: false) @col(name: "resolved")
+  createdAt: Timestamp! @default(expr: "request.time") @col(name: "created_at")
+}

@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 360" width="1100" height="360" role="img" aria-label="Anvil Collaborator Roles">
+  <rect x="0" y="0" width="1100" height="360" fill="#1e1e1e" />
+  <rect x="0.5" y="0.5" width="1099" height="359" fill="none" stroke="#3c3c3c" />
+
+  <rect x="0" y="0" width="1100" height="44" fill="#252526" />
+  <line x1="0" y1="44" x2="1100" y2="44" stroke="#3c3c3c" />
+  <text x="28" y="28" fill="#ffffff" font-family="system-ui, sans-serif" font-size="15" font-weight="700">
+    Collaborator Roles — Live Presence Tags &amp; Team Responsibilities
+  </text>
+
+  <!-- Role 1: Coder -->
+  <rect x="28" y="72" width="244" height="222" fill="#252526" stroke="#3c3c3c" />
+  <rect x="28" y="72" width="244" height="4" fill="#007acc" />
+  <rect x="46" y="92" width="66" height="22" fill="#094771" stroke="#007acc" />
+  <text x="79" y="107" text-anchor="middle" fill="#ffffff" font-family="Consolas, Menlo, monospace" font-size="11" font-weight="700">CODER</text>
+  <text x="46" y="142" fill="#ffffff" font-family="system-ui, sans-serif" font-size="15" font-weight="700">Gameplay &amp; Logic</text>
+  <text x="46" y="168" fill="#9d9d9d" font-family="system-ui, sans-serif" font-size="12">• Writes JS, TS, HTML &amp; CSS</text>
+  <text x="46" y="190" fill="#9d9d9d" font-family="system-ui, sans-serif" font-size="12">• Tunes JSON config &amp; loops</text>
+  <text x="46" y="212" fill="#9d9d9d" font-family="system-ui, sans-serif" font-size="12">• Checks Monaco diagnostics</text>
+  <text x="46" y="234" fill="#9d9d9d" font-family="system-ui, sans-serif" font-size="12">• Reviews &amp; resolves PRs</text>
+  <rect x="46" y="254" width="208" height="24" fill="#1e1e1e" stroke="#3c3c3c" />
+  <text x="150" y="270" text-anchor="middle" fill="#9cdcfe" font-family="Consolas, Menlo, monospace" font-size="11">cursor: username · Coder</text>
+
+  <!-- Role 2: Designer -->
+  <rect x="294" y="72" width="244" height="222" fill="#252526" stroke="#3c3c3c" />
+  <rect x="294" y="72" width="244" height="4" fill="#c586c0" />
+  <rect x="312" y="92" width="84" height="22" fill="#3a2338" stroke="#c586c0" />
+  <text x="354" y="107" text-anchor="middle" fill="#ffffff" font-family="Consolas, Menlo, monospace" font-size="11" font-weight="700">DESIGNER</text>
+  <text x="312" y="142" fill="#ffffff" font-family="system-ui, sans-serif" font-size="15" font-weight="700">Sprites, UI &amp; Levels</text>
+  <text x="312" y="168" fill="#9d9d9d" font-family="system-ui, sans-serif" font-size="12">• Drag-drops PNG, SVG &amp; fonts</text>
+  <text x="312" y="190" fill="#9d9d9d" font-family="system-ui, sans-serif" font-size="12">• Inspects sprites w/ zoom</text>
+  <text x="312" y="212" fill="#9d9d9d" font-family="system-ui, sans-serif" font-size="12">• Toggles alpha checkerboard</text>
+  <text x="312" y="234" fill="#9d9d9d" font-family="system-ui, sans-serif" font-size="12">• Edits CSS &amp; layout tokens</text>
+  <rect x="312" y="254" width="208" height="24" fill="#1e1e1e" stroke="#3c3c3c" />
+  <text x="416" y="270" text-anchor="middle" fill="#c586c0" font-family="Consolas, Menlo, monospace" font-size="11">cursor: username · Designer</text>
+
+  <!-- Role 3: Animator -->
+  <rect x="560" y="72" width="244" height="222" fill="#252526" stroke="#3c3c3c" />
+  <rect x="560" y="72" width="244" height="4" fill="#4ec9b0" />
+  <rect x="578" y="92" width="84" height="22" fill="#193b34" stroke="#4ec9b0" />
+  <text x="620" y="107" text-anchor="middle" fill="#ffffff" font-family="Consolas, Menlo, monospace" font-size="11" font-weight="700">ANIMATOR</text>
+  <text x="578" y="142" fill="#ffffff" font-family="system-ui, sans-serif" font-size="15" font-weight="700">Motion, Timing &amp; Audio</text>
+  <text x="578" y="168" fill="#9d9d9d" font-family="system-ui, sans-serif" font-size="12">• Uploads sprite sheets &amp; SFX</text>
+  <text x="578" y="190" fill="#9d9d9d" font-family="system-ui, sans-serif" font-size="12">• Previews WAV/MP3 seekbar</text>
+  <text x="578" y="212" fill="#9d9d9d" font-family="system-ui, sans-serif" font-size="12">• Adjusts frame &amp; tween JSON</text>
+  <text x="578" y="234" fill="#9d9d9d" font-family="system-ui, sans-serif" font-size="12">• Verifies motion in Preview</text>
+  <rect x="578" y="254" width="208" height="24" fill="#1e1e1e" stroke="#3c3c3c" />
+  <text x="682" y="270" text-anchor="middle" fill="#4ec9b0" font-family="Consolas, Menlo, monospace" font-size="11">cursor: username · Animator</text>
+
+  <!-- Role 4: Tester -->
+  <rect x="826" y="72" width="246" height="222" fill="#252526" stroke="#3c3c3c" />
+  <rect x="826" y="72" width="246" height="4" fill="#dcdcaa" />
+  <rect x="844" y="92" width="70" height="22" fill="#3b3a22" stroke="#dcdcaa" />
+  <text x="879" y="107" text-anchor="middle" fill="#ffffff" font-family="Consolas, Menlo, monospace" font-size="11" font-weight="700">TESTER</text>
+  <text x="844" y="142" fill="#ffffff" font-family="system-ui, sans-serif" font-size="15" font-weight="700">Playtest &amp; QA Review</text>
+  <text x="844" y="168" fill="#9d9d9d" font-family="system-ui, sans-serif" font-size="12">• Playtests in Live Preview</text>
+  <text x="844" y="190" fill="#9d9d9d" font-family="system-ui, sans-serif" font-size="12">• Pins comments to exact lines</text>
+  <text x="844" y="212" fill="#9d9d9d" font-family="system-ui, sans-serif" font-size="12">• Pins feedback onto sprites</text>
+  <text x="844" y="234" fill="#9d9d9d" font-family="system-ui, sans-serif" font-size="12">• Verifies fixes &amp; resolves</text>
+  <rect x="844" y="254" width="210" height="24" fill="#1e1e1e" stroke="#3c3c3c" />
+  <text x="949" y="270" text-anchor="middle" fill="#dcdcaa" font-family="Consolas, Menlo, monospace" font-size="11">cursor: username · Tester</text>
+
+  <rect x="28" y="312" width="1044" height="28" fill="#252526" stroke="#3c3c3c" />
+  <text x="550" y="330" text-anchor="middle" fill="#cccccc" font-family="Consolas, Menlo, monospace" font-size="11">
+    Collaborators can switch roles anytime inside the Collaborators sidebar; all active members can edit, preview, comment, export .zip, and Commit &amp; Push.
+  </text>
+</svg>

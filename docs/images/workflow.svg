@@ -1,0 +1,103 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 320" width="1100" height="320" role="img" aria-label="Anvil Team Collaboration Workflow">
+  <defs>
+    <marker id="wArrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#007acc" />
+    </marker>
+  </defs>
+
+  <rect x="0" y="0" width="1100" height="320" fill="#1e1e1e" />
+  <rect x="0.5" y="0.5" width="1099" height="319" fill="none" stroke="#3c3c3c" />
+
+  <rect x="0" y="0" width="1100" height="42" fill="#252526" />
+  <line x1="0" y1="42" x2="1100" y2="42" stroke="#3c3c3c" />
+  <text x="26" y="27" fill="#ffffff" font-family="system-ui, sans-serif" font-size="15" font-weight="700">
+    Team Collaboration Flow — Zero Local Setup Between Teammates
+  </text>
+
+  <!-- Step 1 -->
+  <rect x="28" y="68" width="154" height="196" fill="#252526" stroke="#3c3c3c" />
+  <rect x="28" y="68" width="154" height="4" fill="#007acc" />
+  <rect x="42" y="84" width="28" height="22" fill="#007acc" />
+  <text x="56" y="100" text-anchor="middle" fill="#ffffff" font-family="Consolas, Menlo, monospace" font-size="12" font-weight="700">1</text>
+  <text x="42" y="132" fill="#ffffff" font-family="system-ui, sans-serif" font-size="14" font-weight="700">Host Starts</text>
+  <text x="42" y="150" fill="#ffffff" font-family="system-ui, sans-serif" font-size="14" font-weight="700">Session</text>
+  <text x="42" y="178" fill="#9d9d9d" font-family="system-ui, sans-serif" font-size="11">Creates or opens</text>
+  <text x="42" y="194" fill="#9d9d9d" font-family="system-ui, sans-serif" font-size="11">cloud project and</text>
+  <text x="42" y="210" fill="#9d9d9d" font-family="system-ui, sans-serif" font-size="11">generates a 6-char</text>
+  <text x="42" y="226" fill="#9cdcfe" font-family="Consolas, Menlo, monospace" font-size="11">Session Code</text>
+
+  <line x1="182" y1="166" x2="206" y2="166" stroke="#007acc" stroke-width="2" marker-end="url(#wArrow)" />
+
+  <!-- Step 2 -->
+  <rect x="206" y="68" width="154" height="196" fill="#252526" stroke="#3c3c3c" />
+  <rect x="206" y="68" width="154" height="4" fill="#4ec9b0" />
+  <rect x="220" y="84" width="28" height="22" fill="#4ec9b0" />
+  <text x="234" y="100" text-anchor="middle" fill="#1e1e1e" font-family="Consolas, Menlo, monospace" font-size="12" font-weight="700">2</text>
+  <text x="220" y="132" fill="#ffffff" font-family="system-ui, sans-serif" font-size="14" font-weight="700">Team Joins</text>
+  <text x="220" y="150" fill="#ffffff" font-family="system-ui, sans-serif" font-size="14" font-weight="700">with Code</text>
+  <text x="220" y="178" fill="#9d9d9d" font-family="system-ui, sans-serif" font-size="11">Verified teammates</text>
+  <text x="220" y="194" fill="#9d9d9d" font-family="system-ui, sans-serif" font-size="11">enter code or link</text>
+  <text x="220" y="210" fill="#9d9d9d" font-family="system-ui, sans-serif" font-size="11">&amp; pick a role tag</text>
+  <text x="220" y="226" fill="#4ec9b0" font-family="Consolas, Menlo, monospace" font-size="11">Designer / Coder</text>
+
+  <line x1="360" y1="166" x2="384" y2="166" stroke="#007acc" stroke-width="2" marker-end="url(#wArrow)" />
+
+  <!-- Step 3 -->
+  <rect x="384" y="68" width="154" height="196" fill="#252526" stroke="#3c3c3c" />
+  <rect x="384" y="68" width="154" height="4" fill="#569cd6" />
+  <rect x="398" y="84" width="28" height="22" fill="#569cd6" />
+  <text x="412" y="100" text-anchor="middle" fill="#1e1e1e" font-family="Consolas, Menlo, monospace" font-size="12" font-weight="700">3</text>
+  <text x="398" y="132" fill="#ffffff" font-family="system-ui, sans-serif" font-size="14" font-weight="700">Live Multi-</text>
+  <text x="398" y="150" fill="#ffffff" font-family="system-ui, sans-serif" font-size="14" font-weight="700">Cursor Edit</text>
+  <text x="398" y="178" fill="#9d9d9d" font-family="system-ui, sans-serif" font-size="11">Conflict-free Yjs</text>
+  <text x="398" y="194" fill="#9d9d9d" font-family="system-ui, sans-serif" font-size="11">CRDT editing plus</text>
+  <text x="398" y="210" fill="#9d9d9d" font-family="system-ui, sans-serif" font-size="11">drag-drop sprites,</text>
+  <text x="398" y="226" fill="#9d9d9d" font-family="system-ui, sans-serif" font-size="11">audio, and JSON</text>
+
+  <line x1="538" y1="166" x2="562" y2="166" stroke="#007acc" stroke-width="2" marker-end="url(#wArrow)" />
+
+  <!-- Step 4 -->
+  <rect x="562" y="68" width="154" height="196" fill="#252526" stroke="#3c3c3c" />
+  <rect x="562" y="68" width="154" height="4" fill="#dcdcaa" />
+  <rect x="576" y="84" width="28" height="22" fill="#dcdcaa" />
+  <text x="590" y="100" text-anchor="middle" fill="#1e1e1e" font-family="Consolas, Menlo, monospace" font-size="12" font-weight="700">4</text>
+  <text x="576" y="132" fill="#ffffff" font-family="system-ui, sans-serif" font-size="14" font-weight="700">Live Server</text>
+  <text x="576" y="150" fill="#ffffff" font-family="system-ui, sans-serif" font-size="14" font-weight="700">Preview</text>
+  <text x="576" y="178" fill="#9d9d9d" font-family="system-ui, sans-serif" font-size="11">Sandboxed iframe</text>
+  <text x="576" y="194" fill="#9d9d9d" font-family="system-ui, sans-serif" font-size="11">auto-reloads HTML,</text>
+  <text x="576" y="210" fill="#9d9d9d" font-family="system-ui, sans-serif" font-size="11">CSS, JS &amp; assets</text>
+  <text x="576" y="226" fill="#dcdcaa" font-family="Consolas, Menlo, monospace" font-size="11">Signed token</text>
+
+  <line x1="716" y1="166" x2="740" y2="166" stroke="#007acc" stroke-width="2" marker-end="url(#wArrow)" />
+
+  <!-- Step 5 -->
+  <rect x="740" y="68" width="154" height="196" fill="#252526" stroke="#3c3c3c" />
+  <rect x="740" y="68" width="154" height="4" fill="#c586c0" />
+  <rect x="754" y="84" width="28" height="22" fill="#c586c0" />
+  <text x="768" y="100" text-anchor="middle" fill="#1e1e1e" font-family="Consolas, Menlo, monospace" font-size="12" font-weight="700">5</text>
+  <text x="754" y="132" fill="#ffffff" font-family="system-ui, sans-serif" font-size="14" font-weight="700">Review &amp;</text>
+  <text x="754" y="150" fill="#ffffff" font-family="system-ui, sans-serif" font-size="14" font-weight="700">Comment</text>
+  <text x="754" y="178" fill="#9d9d9d" font-family="system-ui, sans-serif" font-size="11">Pin comments to</text>
+  <text x="754" y="194" fill="#9d9d9d" font-family="system-ui, sans-serif" font-size="11">code lines or</text>
+  <text x="754" y="210" fill="#9d9d9d" font-family="system-ui, sans-serif" font-size="11">sprites, reply,</text>
+  <text x="754" y="226" fill="#9d9d9d" font-family="system-ui, sans-serif" font-size="11">jump &amp; resolve</text>
+
+  <line x1="894" y1="166" x2="918" y2="166" stroke="#007acc" stroke-width="2" marker-end="url(#wArrow)" />
+
+  <!-- Step 6 -->
+  <rect x="918" y="68" width="154" height="196" fill="#252526" stroke="#3c3c3c" />
+  <rect x="918" y="68" width="154" height="4" fill="#ce9178" />
+  <rect x="932" y="84" width="28" height="22" fill="#ce9178" />
+  <text x="946" y="100" text-anchor="middle" fill="#1e1e1e" font-family="Consolas, Menlo, monospace" font-size="12" font-weight="700">6</text>
+  <text x="932" y="132" fill="#ffffff" font-family="system-ui, sans-serif" font-size="14" font-weight="700">Commit &amp; Push</text>
+  <text x="932" y="150" fill="#ffffff" font-family="system-ui, sans-serif" font-size="14" font-weight="700">or Export .zip</text>
+  <text x="932" y="178" fill="#9d9d9d" font-family="system-ui, sans-serif" font-size="11">One-click push to</text>
+  <text x="932" y="194" fill="#9d9d9d" font-family="system-ui, sans-serif" font-size="11">GitHub with runtime</text>
+  <text x="932" y="210" fill="#9d9d9d" font-family="system-ui, sans-serif" font-size="11">PAT, or download</text>
+  <text x="932" y="226" fill="#ce9178" font-family="Consolas, Menlo, monospace" font-size="11">clean .zip</text>
+
+  <rect x="28" y="280" width="1044" height="24" fill="#252526" stroke="#3c3c3c" />
+  <text x="550" y="296" text-anchor="middle" fill="#cccccc" font-family="Consolas, Menlo, monospace" font-size="11">
+    All files persist continuously in Firebase SQL Connect &amp; Cloud Storage — zero local Git merge conflicts during live work.
+  </text>
+</svg>

@@ -1,0 +1,237 @@
+# Queries for Anvil (executed server-side via Firebase Admin SDK after membership checks)
+
+query GetUserById($id: String!) @auth(level: NO_ACCESS) {
+  user(id: $id) {
+    id
+    username
+    usernameLower
+    email
+    planTier
+    createdAt
+  }
+}
+
+query GetUserByUsernameLower($usernameLower: String!) @auth(level: NO_ACCESS) {
+  users(where: { usernameLower: { eq: $usernameLower } }, limit: 1) {
+    id
+    username
+    email
+    planTier
+    createdAt
+  }
+}
+
+query GetUserByEmail($email: String!) @auth(level: NO_ACCESS) {
+  users(where: { email: { eq: $email } }, limit: 1) {
+    id
+    username
+    email
+    planTier
+    createdAt
+  }
+}
+
+query GetProjectById($id: UUID!) @auth(level: NO_ACCESS) {
+  project(id: $id) {
+    id
+    ownerId
+    name
+    githubOriginUrl
+    defaultBranch
+    entryFile
+    updatedAt
+    owner {
+      id
+      username
+      email
+    }
+  }
+}
+
+query ListProjectsForUser($userId: String!) @auth(level: NO_ACCESS) {
+  projectMembers(where: { userId: { eq: $userId } }) {
+    permanent
+    createdAt
+    project {
+      id
+      ownerId
+      name
+      githubOriginUrl
+      defaultBranch
+      entryFile
+      updatedAt
+      owner {
+        id
+        username
+      }
+    }
+  }
+}
+
+query GetProjectMember($projectId: UUID!, $userId: String!) @auth(level: NO_ACCESS) {
+  projectMember(key: { projectId: $projectId, userId: $userId }) {
+    projectId
+    userId
+    addedBy
+    permanent
+    createdAt
+    user {
+      id
+      username
+      email
+    }
+  }
+}
+
+query ListProjectMembers($projectId: UUID!) @auth(level: NO_ACCESS) {
+  projectMembers(where: { projectId: { eq: $projectId } }) {
+    projectId
+    userId
+    addedBy
+    permanent
+    createdAt
+    user {
+      id
+      username
+      email
+      planTier
+    }
+  }
+}
+
+query ListProjectNodes($projectId: UUID!) @auth(level: NO_ACCESS) {
+  projectNodes(
+    where: { projectId: { eq: $projectId } }
+    orderBy: [{ nodeType: ASC }, { name: ASC }]
+  ) {
+    id
+    projectId
+    parentId
+    name
+    uniqueSiblingKey
+    nodeType
+    contentText
+    storagePath
+    mimeType
+    updatedAt
+  }
+}
+
+query GetProjectNodeById($id: UUID!) @auth(level: NO_ACCESS) {
+  projectNode(id: $id) {
+    id
+    projectId
+    parentId
+    name
+    uniqueSiblingKey
+    nodeType
+    contentText
+    storagePath
+    mimeType
+    updatedAt
+  }
+}
+
+query GetSessionByCode($sessionCode: String!) @auth(level: NO_ACCESS) {
+  sessions(where: { sessionCode: { eq: $sessionCode } }, limit: 1) {
+    id
+    projectId
+    hostId
+    sessionCode
+    status
+    isPersistent
+    createdAt
+    endedAt
+    project {
+      id
+      name
+      ownerId
+      githubOriginUrl
+      defaultBranch
+      entryFile
+    }
+  }
+}
+
+query GetSessionById($id: UUID!) @auth(level: NO_ACCESS) {
+  session(id: $id) {
+    id
+    projectId
+    hostId
+    sessionCode
+    status
+    isPersistent
+    createdAt
+    endedAt
+  }
+}
+
+query GetActiveSessionForProject($projectId: UUID!) @auth(level: NO_ACCESS) {
+  sessions(
+    where: { projectId: { eq: $projectId }, status: { eq: "active" } }
+    orderBy: [{ createdAt: DESC }]
+    limit: 1
+  ) {
+    id
+    projectId
+    hostId
+    sessionCode
+    status
+    isPersistent
+    createdAt
+    endedAt
+  }
+}
+
+query ListActiveSessions @auth(level: NO_ACCESS) {
+  sessions(where: { status: { eq: "active" } }) {
+    id
+    projectId
+    hostId
+    sessionCode
+    status
+    isPersistent
+    createdAt
+  }
+}
+
+query ListSessionMembers($sessionId: UUID!) @auth(level: NO_ACCESS) {
+  sessionMembers(where: { sessionId: { eq: $sessionId } }) {
+    sessionId
+    userId
+    role
+    joinedAt
+    user {
+      id
+      username
+      email
+    }
+  }
+}
+
+query ListProjectComments($projectId: UUID!) @auth(level: NO_ACCESS) {
+  comments(
+    where: { projectId: { eq: $projectId } }
+    orderBy: [{ createdAt: ASC }]
+  ) {
+    id
+    projectId
+    nodeId
+    authorId
+    parentCommentId
+    lineNumber
+    body
+    resolved
+    createdAt
+    author {
+      id
+      username
+    }
+    node {
+      id
+      name
+      nodeType
+      parentId
+    }
+  }
+}

@@ -1,0 +1,23 @@
+title = "Anvil Secret Scanner Configuration"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Allow example templates, lockfiles, documentation, and synthetic unit/e2e test fixture strings"
+paths = [
+  '''^\.env\.example$''',
+  '''^\.firebaserc\.example$''',
+  '''^package-lock\.json$''',
+  '''^docs/''',
+  '''^README\.md$''',
+]
+regexes = [
+  '''ghp_SENSITIVE_PAT_999''',
+  '''ghp_SENSITIVE_PAT_SHOULD_NEVER_LEAK_999''',
+  '''ghp_SuperSecretToken12345\+abc''',
+  '''ghp_\.\.\.''',
+  '''your-firebase-web-api-key''',
+  '''anvil-local-api-key''',
+  '''replace-with-.*''',
+]

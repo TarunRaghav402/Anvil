@@ -1,0 +1,238 @@
+# Mutations for Anvil (executed server-side via Firebase Admin SDK after membership checks)
+
+mutation CreateUser(
+  $id: String!
+  $username: String!
+  $usernameLower: String!
+  $email: String!
+  $planTier: String!
+) @auth(level: NO_ACCESS) {
+  user_insert(
+    data: {
+      id: $id
+      username: $username
+      usernameLower: $usernameLower
+      email: $email
+      planTier: $planTier
+    }
+  )
+}
+
+mutation CreateProject(
+  $id: UUID!
+  $ownerId: String!
+  $name: String!
+  $defaultBranch: String!
+  $entryFile: String!
+) @auth(level: NO_ACCESS) {
+  project_insert(
+    data: {
+      id: $id
+      ownerId: $ownerId
+      name: $name
+      defaultBranch: $defaultBranch
+      entryFile: $entryFile
+    }
+  )
+}
+
+mutation UpdateProjectSettings(
+  $id: UUID!
+  $name: String
+  $githubOriginUrl: String
+  $defaultBranch: String
+  $entryFile: String
+  $updatedAt: Timestamp!
+) @auth(level: NO_ACCESS) {
+  project_update(
+    id: $id
+    data: {
+      name: $name
+      githubOriginUrl: $githubOriginUrl
+      defaultBranch: $defaultBranch
+      entryFile: $entryFile
+      updatedAt: $updatedAt
+    }
+  )
+}
+
+mutation DeleteProject($id: UUID!) @auth(level: NO_ACCESS) {
+  project_delete(id: $id)
+}
+
+mutation UpsertProjectMember(
+  $projectId: UUID!
+  $userId: String!
+  $addedBy: String!
+  $permanent: Boolean!
+) @auth(level: NO_ACCESS) {
+  projectMember_upsert(
+    data: {
+      projectId: $projectId
+      userId: $userId
+      addedBy: $addedBy
+      permanent: $permanent
+    }
+  )
+}
+
+mutation DeleteProjectMember($projectId: UUID!, $userId: String!) @auth(level: NO_ACCESS) {
+  projectMember_delete(key: { projectId: $projectId, userId: $userId })
+}
+
+mutation CreateProjectNode(
+  $id: UUID!
+  $projectId: UUID!
+  $parentId: UUID
+  $name: String!
+  $uniqueSiblingKey: String!
+  $nodeType: String!
+  $contentText: String
+  $storagePath: String
+  $mimeType: String!
+) @auth(level: NO_ACCESS) {
+  projectNode_insert(
+    data: {
+      id: $id
+      projectId: $projectId
+      parentId: $parentId
+      name: $name
+      uniqueSiblingKey: $uniqueSiblingKey
+      nodeType: $nodeType
+      contentText: $contentText
+      storagePath: $storagePath
+      mimeType: $mimeType
+    }
+  )
+}
+
+mutation UpdateProjectNodeMeta(
+  $id: UUID!
+  $parentId: UUID
+  $name: String!
+  $uniqueSiblingKey: String!
+  $updatedAt: Timestamp!
+) @auth(level: NO_ACCESS) {
+  projectNode_update(
+    id: $id
+    data: {
+      parentId: $parentId
+      name: $name
+      uniqueSiblingKey: $uniqueSiblingKey
+      updatedAt: $updatedAt
+    }
+  )
+}
+
+mutation UpdateProjectNodeContent(
+  $id: UUID!
+  $contentText: String!
+  $updatedAt: Timestamp!
+) @auth(level: NO_ACCESS) {
+  projectNode_update(
+    id: $id
+    data: {
+      contentText: $contentText
+      updatedAt: $updatedAt
+    }
+  )
+}
+
+mutation UpdateProjectNodeAsset(
+  $id: UUID!
+  $storagePath: String!
+  $mimeType: String!
+  $updatedAt: Timestamp!
+) @auth(level: NO_ACCESS) {
+  projectNode_update(
+    id: $id
+    data: {
+      storagePath: $storagePath
+      mimeType: $mimeType
+      updatedAt: $updatedAt
+    }
+  )
+}
+
+mutation DeleteProjectNode($id: UUID!) @auth(level: NO_ACCESS) {
+  projectNode_delete(id: $id)
+}
+
+mutation CreateSession(
+  $id: UUID!
+  $projectId: UUID!
+  $hostId: String!
+  $sessionCode: String!
+  $status: String!
+  $isPersistent: Boolean!
+) @auth(level: NO_ACCESS) {
+  session_insert(
+    data: {
+      id: $id
+      projectId: $projectId
+      hostId: $hostId
+      sessionCode: $sessionCode
+      status: $status
+      isPersistent: $isPersistent
+    }
+  )
+}
+
+mutation EndSession($id: UUID!, $endedAt: Timestamp!) @auth(level: NO_ACCESS) {
+  session_update(
+    id: $id
+    data: {
+      status: "ended"
+      endedAt: $endedAt
+    }
+  )
+}
+
+mutation UpsertSessionMember(
+  $sessionId: UUID!
+  $userId: String!
+  $role: String!
+) @auth(level: NO_ACCESS) {
+  sessionMember_upsert(
+    data: {
+      sessionId: $sessionId
+      userId: $userId
+      role: $role
+    }
+  )
+}
+
+mutation DeleteSessionMember($sessionId: UUID!, $userId: String!) @auth(level: NO_ACCESS) {
+  sessionMember_delete(key: { sessionId: $sessionId, userId: $userId })
+}
+
+mutation CreateComment(
+  $id: UUID!
+  $projectId: UUID!
+  $nodeId: UUID!
+  $authorId: String!
+  $parentCommentId: UUID
+  $lineNumber: Int
+  $body: String!
+) @auth(level: NO_ACCESS) {
+  comment_insert(
+    data: {
+      id: $id
+      projectId: $projectId
+      nodeId: $nodeId
+      authorId: $authorId
+      parentCommentId: $parentCommentId
+      lineNumber: $lineNumber
+      body: $body
+      resolved: false
+    }
+  )
+}
+
+mutation SetCommentResolved($id: UUID!, $resolved: Boolean!) @auth(level: NO_ACCESS) {
+  comment_update(id: $id, data: { resolved: $resolved })
+}
+
+mutation DeleteComment($id: UUID!) @auth(level: NO_ACCESS) {
+  comment_delete(id: $id)
+}

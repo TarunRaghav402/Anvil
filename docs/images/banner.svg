@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 280" width="1200" height="280" role="img" aria-label="Anvil — Collaborative Cloud Workspace Banner">
+  <!-- Background (Dark+ #1e1e1e, strictly flat, no gradients) -->
+  <rect x="0" y="0" width="1200" height="280" fill="#1e1e1e" />
+  <rect x="0" y="0" width="1200" height="4" fill="#007acc" />
+  <rect x="0.5" y="0.5" width="1199" height="279" fill="none" stroke="#3c3c3c" stroke-width="1" />
+
+  <!-- Subtle architectural grid lines -->
+  <line x1="900" y1="4" x2="900" y2="254" stroke="#252526" stroke-width="1" />
+  <line x1="960" y1="4" x2="960" y2="254" stroke="#252526" stroke-width="1" />
+  <line x1="1020" y1="4" x2="1020" y2="254" stroke="#252526" stroke-width="1" />
+  <line x1="1080" y1="4" x2="1080" y2="254" stroke="#252526" stroke-width="1" />
+  <line x1="1140" y1="4" x2="1140" y2="254" stroke="#252526" stroke-width="1" />
+
+  <!-- Flat Anvil & Hammer Icon Box -->
+  <rect x="72" y="48" width="156" height="156" fill="#252526" stroke="#3c3c3c" stroke-width="2" />
+  <rect x="72" y="48" width="156" height="4" fill="#007acc" />
+
+  <!-- Flat Hammer -->
+  <rect x="150" y="68" width="44" height="18" fill="#4ec9b0" transform="rotate(-25 172 77)" />
+  <rect x="169" y="83" width="8" height="36" fill="#ce9178" transform="rotate(-25 173 101)" />
+
+  <!-- Flat Anvil -->
+  <polygon points="94,120 206,120 190,142 114,142" fill="#cccccc" />
+  <polygon points="86,120 112,120 114,136 96,133" fill="#9cdcfe" />
+  <rect x="128" y="142" width="44" height="26" fill="#858585" />
+  <polygon points="110,168 190,168 198,184 102,184" fill="#007acc" />
+
+  <!-- Wordmark & Tagline -->
+  <text x="264" y="122" fill="#ffffff" font-family="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="64" font-weight="800" letter-spacing="2">
+    ANVIL
+  </text>
+  <text x="266" y="160" fill="#9cdcfe" font-family="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="21" font-weight="500">
+    Real-time collaborative cloud workspace for game &amp; software teams
+  </text>
+
+  <!-- Tech Tags -->
+  <rect x="266" y="182" width="118" height="26" fill="#252526" stroke="#3c3c3c" />
+  <text x="325" y="199" text-anchor="middle" fill="#cccccc" font-family="Consolas, Menlo, Monaco, monospace" font-size="12">TypeScript</text>
+
+  <rect x="394" y="182" width="106" height="26" fill="#252526" stroke="#3c3c3c" />
+  <text x="447" y="199" text-anchor="middle" fill="#4ec9b0" font-family="Consolas, Menlo, Monaco, monospace" font-size="12">Yjs CRDT</text>
+
+  <rect x="510" y="182" width="124" height="26" fill="#252526" stroke="#3c3c3c" />
+  <text x="572" y="199" text-anchor="middle" fill="#569cd6" font-family="Consolas, Menlo, Monaco, monospace" font-size="12">Monaco Editor</text>
+
+  <rect x="644" y="182" width="112" height="26" fill="#252526" stroke="#3c3c3c" />
+  <text x="700" y="199" text-anchor="middle" fill="#dcdcaa" font-family="Consolas, Menlo, Monaco, monospace" font-size="12">Firebase</text>
+
+  <!-- Decorative right-side code window preview -->
+  <rect x="930" y="48" width="210" height="156" fill="#252526" stroke="#3c3c3c" stroke-width="1.5" />
+  <rect x="930" y="48" width="210" height="24" fill="#333333" />
+  <text x="944" y="64" fill="#cccccc" font-family="Consolas, Menlo, monospace" font-size="11">main.js — Session K7M9P2</text>
+  <rect x="944" y="88" width="94" height="8" fill="#569cd6" />
+  <rect x="1046" y="88" width="52" height="8" fill="#4ec9b0" />
+  <rect x="944" y="108" width="60" height="8" fill="#c586c0" />
+  <rect x="1012" y="108" width="90" height="8" fill="#ce9178" />
+  <rect x="944" y="128" width="124" height="8" fill="#cccccc" />
+  <rect x="1072" y="124" width="2" height="16" fill="#4ec9b0" />
+  <rect x="1072" y="114" width="52" height="12" fill="#4ec9b0" />
+  <text x="1077" y="123" fill="#1e1e1e" font-family="system-ui, sans-serif" font-size="8" font-weight="700">alice · Coder</text>
+  <rect x="944" y="148" width="84" height="8" fill="#9cdcfe" />
+  <rect x="1036" y="148" width="66" height="8" fill="#dcdcaa" />
+  <rect x="944" y="168" width="140" height="8" fill="#3c3c3c" />
+
+  <!-- VS Code Status Bar -->
+  <rect x="0" y="254" width="1200" height="26" fill="#007acc" />
+  <text x="24" y="271" fill="#ffffff" font-family="Consolas, Menlo, monospace" font-size="12" font-weight="700">
+    ANVIL WORKSPACE  |  NO LOCAL REPO LOCKS  |  LIVE PREVIEW  |  WINDOWS · MACOS · LINUX
+  </text>
+</svg>
