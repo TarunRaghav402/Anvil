@@ -18,6 +18,7 @@ import {
   revokePreviewTokensForUser,
   verifyPreviewToken,
 } from "../src/services/previewTokens.js";
+import { generateOtpCode, storeOtp, verifyOtp } from "../src/services/emailOtpService.js";
 
 test("Cross-OS filename validation rejects Windows reserved names and illegal characters", () => {
   for (const bad of [
@@ -125,4 +126,26 @@ test("Preview capability tokens verify project binding and revoke cleanly", () =
 
   revokePreviewTokensForUser("project-123", "user-abc");
   assert.equal(verifyPreviewToken(token, "project-123"), null);
+});
+
+test("Email OTP generation, verification, single-use consumption, and attempt lockout", () => {
+  const code = generateOtpCode();
+  assert.match(code, /^\d{6}$/);
+
+  storeOtp("verify_email", "Tester@Anvil.local", code, 60_000);
+  // Wrong code increments attempts
+  const bad1 = verifyOtp("verify_email", "tester@anvil.local", "000000");
+  assert.equal(bad1.valid, false);
+  // Valid code succeeds (case-insensitive email) and clears OTP (single-use)
+  const ok = verifyOtp("verify_email", "tester@anvil.local", code);
+  assert.equal(ok.valid, true);
+  const reuse = verifyOtp("verify_email", "tester@anvil.local", code);
+  assert.equal(reuse.valid, false);
+
+  // Attempt lockout after 5 wrong guesses
+  storeOtp("reset_password", "lock@anvil.local", "654321", 60_000);
+  for (let i = 0; i < 5; i++) {
+    assert.equal(verifyOtp("reset_password", "lock@anvil.local", "111111").valid, false);
+  }
+  assert.equal(verifyOtp("reset_password", "lock@anvil.local", "654321").valid, false);
 });

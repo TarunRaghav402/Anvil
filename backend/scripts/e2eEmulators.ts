@@ -117,11 +117,55 @@ async function run() {
     const blockedUnverified = await apiReq("/api/projects", userA.idToken);
     assert.equal(blockedUnverified.status, 403);
     assert.equal(blockedUnverified.json.code, "EMAIL_NOT_VERIFIED");
-    console.log("2. Email verification gate enforced (403 for unverified user).");
 
-    // Verify User A, B, C
-    await adminAuth.updateUser(userA.uid, { emailVerified: true });
-    const tokenA = await emulatorSignIn(emailA, pw);
+    // Verify User A via 6-digit email OTP endpoint
+    const otpSendA = await apiReq("/api/auth/send-verification-code", userA.idToken, {
+      method: "POST",
+    });
+    assert.equal(otpSendA.status, 200);
+    assert.match(String(otpSendA.json.emulatorCode), /^\d{6}$/);
+
+    const otpVerifyA = await apiReq("/api/auth/verify-email-code", userA.idToken, {
+      method: "POST",
+      body: JSON.stringify({ code: otpSendA.json.emulatorCode }),
+    });
+    assert.equal(otpVerifyA.status, 200);
+    assert.equal(otpVerifyA.json.verified, true);
+    console.log("2. Email verification gate & 6-digit OTP verification enforced.");
+
+    // Username-only login + forgot-password reset flow
+    const badLogin = await apiReq("/api/auth/login-username", "", {
+      method: "POST",
+      body: JSON.stringify({ username: `host_${suffix}`, password: "WrongPassword!" }),
+    });
+    assert.equal(badLogin.status, 401);
+
+    const okLogin = await apiReq("/api/auth/login-username", "", {
+      method: "POST",
+      body: JSON.stringify({ username: `host_${suffix}`, password: pw }),
+    });
+    assert.equal(okLogin.status, 200);
+    assert.equal(okLogin.json.email, emailA);
+
+    const forgotRes = await apiReq("/api/auth/forgot-password", "", {
+      method: "POST",
+      body: JSON.stringify({ email: emailA }),
+    });
+    assert.equal(forgotRes.status, 200);
+    assert.match(String(forgotRes.json.emulatorCode), /^\d{6}$/);
+
+    const newPw = "AnvilUpdated!456";
+    const resetRes = await apiReq("/api/auth/reset-password", "", {
+      method: "POST",
+      body: JSON.stringify({
+        email: emailA,
+        code: forgotRes.json.emulatorCode,
+        newPassword: newPw,
+      }),
+    });
+    assert.equal(resetRes.status, 200);
+    const tokenA = await emulatorSignIn(emailA, newPw);
+    console.log("2b. Username-only login and forgot/reset password code flow verified.");
 
     const userB = await emulatorSignUp(emailB, pw);
     // Duplicate username must fail with 409

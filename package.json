@@ -28,8 +28,8 @@
     "frontend"
   ],
   "scripts": {
+    "clean-dev": "sh scripts/clean-dev.sh",
     "dev": "concurrently -k -n EMULATORS,BACKEND,FRONTEND -c yellow,cyan,green \"npm run emulators\" \"npm run dev:backend\" \"npm run dev:frontend\"",
-    "dev:app": "concurrently -k -n BACKEND,FRONTEND -c cyan,green \"npm run dev:backend\" \"npm run dev:frontend\"",
     "emulators": "node scripts/run-emulators.mjs start",
     "emulators:exec": "node scripts/run-emulators.mjs exec",
     "dev:backend": "npm --workspace=backend run dev",

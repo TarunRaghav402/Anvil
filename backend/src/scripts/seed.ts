@@ -12,7 +12,7 @@ if (!env.USE_FIREBASE_EMULATORS) {
 async function ensureUser(username: string, email: string, password: string): Promise<string> {
   const existingSql = await db.getUserByEmail(email);
 
-  let authUser = null;
+  let authUser: Awaited<ReturnType<typeof adminAuth.getUserByEmail>> | null;
   try {
     authUser = await adminAuth.getUserByEmail(email);
   } catch {

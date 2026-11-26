@@ -79,6 +79,65 @@ export const api = {
     });
   },
 
+  loginWithUsername(username: string, password: string): Promise<{ email: string; username: string }> {
+    return request(
+      "/api/auth/login-username",
+      {
+        method: "POST",
+        body: JSON.stringify({ username, password }),
+      },
+      false
+    );
+  },
+
+  sendVerificationCode(): Promise<{
+    sent: boolean;
+    alreadyVerified?: boolean;
+    delivery: "smtp" | "emulator";
+    canQuickVerify?: boolean;
+    emulatorCode?: string;
+  }> {
+    return request("/api/auth/send-verification-code", { method: "POST" });
+  },
+
+  verifyEmailCode(input: { code?: string; emulatorQuickVerify?: boolean }): Promise<{ verified: boolean }> {
+    return request("/api/auth/verify-email-code", {
+      method: "POST",
+      body: JSON.stringify(input),
+    });
+  },
+
+  forgotPassword(email: string): Promise<{
+    sent: boolean;
+    delivery: "smtp" | "emulator";
+    message: string;
+    emulatorCode?: string;
+  }> {
+    return request(
+      "/api/auth/forgot-password",
+      {
+        method: "POST",
+        body: JSON.stringify({ email }),
+      },
+      false
+    );
+  },
+
+  resetPassword(
+    email: string,
+    code: string,
+    newPassword: string
+  ): Promise<{ reset: boolean; username: string }> {
+    return request(
+      "/api/auth/reset-password",
+      {
+        method: "POST",
+        body: JSON.stringify({ email, code, newPassword }),
+      },
+      false
+    );
+  },
+
   getMe(): Promise<{ uid: string; email: string; emailVerified: boolean; user: AnvilUser | null }> {
     return request("/api/auth/me");
   },

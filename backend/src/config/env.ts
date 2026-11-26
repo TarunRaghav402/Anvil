@@ -67,6 +67,16 @@ const envSchema = z
     PREVIEW_TOKEN_SECRET: z.string().min(16, "PREVIEW_TOKEN_SECRET must be at least 16 characters"),
     MAX_UPLOAD_SIZE_MB: z.coerce.number().min(1).max(100).default(15),
     GIT_TIMEOUT_MS: z.coerce.number().int().min(5000).max(300_000).default(60_000),
+
+    FIREBASE_WEB_API_KEY: z.string().optional(),
+    VITE_FIREBASE_API_KEY: z.string().optional(),
+
+    SMTP_HOST: z.string().optional(),
+    SMTP_PORT: z.coerce.number().int().min(1).max(65535).default(587),
+    SMTP_SECURE: booleanStringSchema,
+    SMTP_USER: z.string().optional(),
+    SMTP_PASS: z.string().optional(),
+    SMTP_FROM: z.string().optional(),
   })
   .superRefine((val, ctx) => {
     if (val.USE_FIREBASE_EMULATORS) {
