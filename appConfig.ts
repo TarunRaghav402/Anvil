@@ -12,3 +12,44 @@ export const ROLE_LABELS: Record<ProjectRole, string> = {
   animator: "Animator",
   tester: "Tester",
 };
+
+/**
+ * Intentionally empty in source control so personal email addresses are never
+ * exposed in the public repository or compiled client bundle.
+ * Server-side admins are configured via the backend `ADMIN_EMAILS` env variable.
+ */
+export const ADMIN_EMAILS: string[] = [];
+
+export type PlanTier = "admin" | "pro" | "free";
+
+export interface PlanTierResolveOptions {
+  adminEmails?: readonly string[];
+  trustAdminTier?: boolean;
+}
+
+export function resolveUserPlanTier(
+  identifier?: { username?: string; email?: string } | null,
+  rawTier?: string | null,
+  options?: PlanTierResolveOptions
+): PlanTier {
+  const cleanTier = rawTier?.trim().toLowerCase();
+  const emailLower = identifier?.email?.trim().toLowerCase();
+  const adminList = options?.adminEmails ?? ADMIN_EMAILS;
+
+  if (
+    emailLower &&
+    adminList.some((adminEmail) => adminEmail.trim().toLowerCase() === emailLower)
+  ) {
+    return "admin";
+  }
+
+  if (options?.trustAdminTier !== false && cleanTier === "admin") {
+    return "admin";
+  }
+
+  if (cleanTier === "pro" || cleanTier === "premium") {
+    return "pro";
+  }
+
+  return "free";
+}

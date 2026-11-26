@@ -79,3 +79,194 @@ pre,
   width: 4px !important;
   margin-left: 4px;
 }
+
+/* Intro Splash Forge Animations */
+@keyframes anvilSceneFadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(10px) scale(0.96);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes anvilHammerChoreography {
+  0% {
+    opacity: 0;
+    transform: rotate(20deg) translateY(-6px);
+  }
+  16% {
+    opacity: 1;
+    transform: rotate(36deg) translateY(0);
+  }
+  25% {
+    opacity: 1;
+    transform: rotate(42deg) translateY(0);
+  }
+  /* Strike 1 at ~30% (~0.765s of 2.55s) */
+  30% {
+    opacity: 1;
+    transform: rotate(0deg) translateY(0);
+  }
+  37% {
+    opacity: 1;
+    transform: rotate(28deg) translateY(0);
+  }
+  45% {
+    opacity: 1;
+    transform: rotate(36deg) translateY(0);
+  }
+  /* Strike 2 at ~51% (~1.30s of 2.55s) */
+  51% {
+    opacity: 1;
+    transform: rotate(0deg) translateY(0);
+  }
+  62% {
+    opacity: 1;
+    transform: rotate(15deg) translateY(0);
+  }
+  84% {
+    opacity: 0.65;
+    transform: rotate(22deg) translateY(-4px);
+  }
+  100% {
+    opacity: 0;
+    transform: rotate(26deg) translateY(-8px);
+  }
+}
+
+@keyframes anvilBodyRecoil {
+  0%, 29% {
+    transform: translateY(0) scaleY(1);
+  }
+  30.5% {
+    transform: translateY(3px) scaleX(1.018) scaleY(0.975);
+  }
+  36%, 50.5% {
+    transform: translateY(0) scaleY(1);
+  }
+  52% {
+    transform: translateY(4px) scaleX(1.024) scaleY(0.968);
+  }
+  60%, 100% {
+    transform: translateY(0) scaleY(1);
+  }
+}
+
+@keyframes anvilImpactFlash {
+  0% {
+    opacity: 0;
+  }
+  15% {
+    opacity: 0.95;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes anvilShockwaveRing {
+  0% {
+    opacity: 0.85;
+    transform: scale(0.2);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(2.4);
+  }
+}
+
+@keyframes anvilSparkBurst {
+  0% {
+    opacity: 1;
+    transform: translate(0, 0) scale(1);
+  }
+  65% {
+    opacity: 0.9;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--tx, 24px), var(--ty, -36px)) scale(0.2);
+  }
+}
+
+@keyframes anvilWordmarkReveal {
+  0% {
+    opacity: 0;
+    transform: translateY(8px);
+    letter-spacing: 0.34em;
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+    letter-spacing: 0.24em;
+  }
+}
+
+@keyframes anvilProgressFill {
+  0% {
+    width: 0%;
+  }
+  30% {
+    width: 36%;
+  }
+  52% {
+    width: 68%;
+  }
+  88% {
+    width: 96%;
+  }
+  100% {
+    width: 100%;
+  }
+}
+
+.anvil-scene-enter {
+  animation: anvilSceneFadeIn 450ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.anvil-hammer-arm {
+  transform-box: view-box;
+  transform-origin: 294px 101px;
+  animation: anvilHammerChoreography 2550ms cubic-bezier(0.32, 0.05, 0.2, 1) forwards;
+}
+
+.anvil-body-recoil {
+  transform-box: view-box;
+  transform-origin: 180px 180px;
+  animation: anvilBodyRecoil 2550ms ease-out forwards;
+}
+
+.anvil-impact-flash {
+  animation: anvilImpactFlash 360ms ease-out forwards;
+}
+
+.anvil-shockwave-ring {
+  transform-box: view-box;
+  transform-origin: 178px 118px;
+  animation: anvilShockwaveRing 580ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.anvil-spark {
+  animation: anvilSparkBurst 560ms cubic-bezier(0.12, 0.85, 0.28, 1) forwards;
+}
+
+.anvil-wordmark-enter {
+  animation: anvilWordmarkReveal 520ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.anvil-progress-bar {
+  animation: anvilProgressFill 2100ms cubic-bezier(0.25, 0.9, 0.35, 1) forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .anvil-hammer-arm,
+  .anvil-body-recoil,
+  .anvil-impact-flash,
+  .anvil-shockwave-ring,
+  .anvil-spark {
+    animation: none !important;
+  }
+}

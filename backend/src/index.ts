@@ -2,6 +2,7 @@ import http from "http";
 import cors from "cors";
 import express, { type NextFunction, type Request, type Response } from "express";
 import helmet from "helmet";
+import multer from "multer";
 import { Server as SocketIOServer } from "socket.io";
 import { APP_NAME } from "../../appConfig.js";
 import { env } from "./config/env.js";
@@ -75,21 +76,41 @@ app.use("/api/projects", verifyFirebaseToken, requireVerifiedUser, createProject
 app.use("/api/projects", verifyFirebaseToken, requireVerifiedUser, createCommentsRouter(sessionManager));
 app.use("/api/sessions", verifyFirebaseToken, requireVerifiedUser, createSessionsRouter(sessionManager));
 
-// Global error handler (never leak internal stack traces or secrets)
+// Global error handler (never leak internal stack traces, SQL schemas, or secrets)
 app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
+  if (err instanceof multer.MulterError) {
+    const status = err.code === "LIMIT_FILE_SIZE" ? 413 : 400;
+    const message =
+      err.code === "LIMIT_FILE_SIZE"
+        ? `Uploaded file exceeds the ${env.MAX_UPLOAD_SIZE_MB} MB limit.`
+        : err.message;
+    res.status(status).json({ error: message });
+    return;
+  }
   if (err instanceof DbError) {
+    if (err.statusCode >= 500) {
+      console.error(`[${APP_NAME}] Database error:`, err);
+      res.status(err.statusCode).json({ error: "A database error occurred." });
+      return;
+    }
     res.status(err.statusCode).json({ error: err.message });
     return;
   }
-  const status =
-    typeof err === "object" && err !== null && "statusCode" in err
-      ? Number((err as { statusCode?: number }).statusCode || 500)
-      : 500;
-  const message =
-    err instanceof Error ? err.message : "An unexpected internal server error occurred.";
+  const rawStatus =
+    typeof err === "object" && err !== null
+      ? "statusCode" in err
+        ? (err as { statusCode?: number }).statusCode
+        : "status" in err
+        ? (err as { status?: number }).status
+        : undefined
+      : undefined;
+  const status = typeof rawStatus === "number" && rawStatus >= 400 && rawStatus < 600 ? rawStatus : 500;
   if (status >= 500) {
     console.error(`[${APP_NAME}] Unhandled error:`, err);
+    res.status(status).json({ error: "An unexpected internal server error occurred." });
+    return;
   }
+  const message = err instanceof Error ? err.message : "Request failed.";
   res.status(status).json({ error: message });
 });
 

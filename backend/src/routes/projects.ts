@@ -7,7 +7,7 @@ import { env } from "../config/env.js";
 import { requireProjectMember, requireProjectOwner } from "../middleware/accessControl.js";
 import { db, newUuid, sameUuid } from "../services/db.js";
 import type { GitService } from "../services/gitService.js";
-import { GitValidationError } from "../services/gitService.js";
+import { GitValidationError, validateGitBranchName } from "../services/gitService.js";
 import { issuePreviewToken } from "../services/previewTokens.js";
 import {
   assertValidAndUniqueSiblingName,
@@ -20,7 +20,7 @@ import { createCanvasStarterFiles } from "../services/starterTemplate.js";
 import { downloadAssetBuffer, uploadAssetBuffer } from "../services/storageService.js";
 import type { YjsCollaborationServer } from "../services/yjsServer.js";
 import { streamProjectZip } from "../services/zipExport.js";
-import { normalizeNodeName } from "../utils/filenames.js";
+import { normalizeNodeName, sanitizeProjectRelativePath } from "../utils/filenames.js";
 
 const uuidSchema = z
   .string()
@@ -141,13 +141,16 @@ export function createProjectsRouter(
         return;
       }
 
+      const defaultBranch = validateGitBranchName(parsed.data.defaultBranch);
+      const entryFile = sanitizeProjectRelativePath(parsed.data.entryFile);
+
       const projectId = newUuid();
       await db.createProject({
         id: projectId,
         ownerId: req.dbUser!.id,
         name: normalizeNodeName(parsed.data.name),
-        defaultBranch: parsed.data.defaultBranch,
-        entryFile: parsed.data.entryFile,
+        defaultBranch,
+        entryFile,
       });
 
       await db.upsertProjectMember({
@@ -164,6 +167,14 @@ export function createProjectsRouter(
       const project = await db.getProjectById(projectId);
       res.status(201).json({ project });
     } catch (err) {
+      if (err instanceof GitValidationError) {
+        res.status(err.statusCode).json({ error: err.message });
+        return;
+      }
+      if (err instanceof Error && /file path|traversal|forbidden|reserved|empty/i.test(err.message)) {
+        res.status(400).json({ error: err.message });
+        return;
+      }
       next(err);
     }
   });
@@ -213,10 +224,29 @@ export function createProjectsRouter(
         return;
       }
 
-      await db.updateProjectSettings(req.params.projectId!, parsed.data);
+      const patch = { ...parsed.data };
+      if (patch.name !== undefined) {
+        patch.name = normalizeNodeName(patch.name);
+      }
+      if (patch.defaultBranch !== undefined) {
+        patch.defaultBranch = validateGitBranchName(patch.defaultBranch);
+      }
+      if (patch.entryFile !== undefined) {
+        patch.entryFile = sanitizeProjectRelativePath(patch.entryFile);
+      }
+
+      await db.updateProjectSettings(req.params.projectId!, patch);
       const updated = await db.getProjectById(req.params.projectId!);
       res.json({ project: updated });
     } catch (err) {
+      if (err instanceof GitValidationError) {
+        res.status(err.statusCode).json({ error: err.message });
+        return;
+      }
+      if (err instanceof Error && /file path|traversal|forbidden|reserved|empty/i.test(err.message)) {
+        res.status(400).json({ error: err.message });
+        return;
+      }
       next(err);
     }
   });
@@ -317,7 +347,7 @@ export function createProjectsRouter(
 
       const nodes = await db.listProjectNodes(projectId);
       if (parsed.data.parentId) {
-        const parent = nodes.find((n) => n.id === parsed.data.parentId);
+        const parent = nodes.find((n) => sameUuid(n.id, parsed.data.parentId));
         if (!parent || parent.nodeType !== "folder") {
           res.status(400).json({ error: "Parent folder does not exist." });
           return;
@@ -370,6 +400,10 @@ export function createProjectsRouter(
     try {
       const projectId = req.params.projectId!;
       const nodeId = req.params.nodeId!;
+      if (!uuidSchema.safeParse(nodeId).success) {
+        res.status(400).json({ error: "Invalid node ID." });
+        return;
+      }
       const schema = z.object({
         name: z.string().min(1).optional(),
         parentId: uuidSchema.nullable().optional(),
@@ -381,7 +415,7 @@ export function createProjectsRouter(
       }
 
       const nodes = await db.listProjectNodes(projectId);
-      const target = nodes.find((n) => n.id === nodeId);
+      const target = nodes.find((n) => sameUuid(n.id, nodeId));
       if (!target) {
         res.status(404).json({ error: "File or folder not found." });
         return;
@@ -391,12 +425,12 @@ export function createProjectsRouter(
       const nextName = parsed.data.name !== undefined ? parsed.data.name : target.name;
 
       if (nextParentId) {
-        const parent = nodes.find((n) => n.id === nextParentId);
+        const parent = nodes.find((n) => sameUuid(n.id, nextParentId));
         if (!parent || parent.nodeType !== "folder") {
           res.status(400).json({ error: "Destination folder does not exist." });
           return;
         }
-        if (nextParentId === nodeId || isDescendantNode(nodes, nextParentId, nodeId)) {
+        if (sameUuid(nextParentId, target.id) || isDescendantNode(nodes, parent.id, target.id)) {
           res.status(400).json({ error: "Cannot move a folder into itself or its descendant." });
           return;
         }
@@ -407,7 +441,7 @@ export function createProjectsRouter(
         projectId,
         nextParentId,
         nextName,
-        nodeId
+        target.id
       );
       if (!nameCheck.valid) {
         res.status(nameCheck.statusCode).json({ error: nameCheck.error });
@@ -415,7 +449,7 @@ export function createProjectsRouter(
       }
 
       await db.updateProjectNodeMeta({
-        id: nodeId,
+        id: target.id,
         projectId,
         parentId: nextParentId,
         name: nameCheck.normalizedName,
@@ -425,7 +459,7 @@ export function createProjectsRouter(
       sessions.schedulePreviewReload(projectId, "node-renamed");
 
       const updatedNodes = attachRelativePaths(await db.listProjectNodes(projectId));
-      const updated = updatedNodes.find((n) => n.id === nodeId);
+      const updated = updatedNodes.find((n) => sameUuid(n.id, target.id));
       res.json({ node: updated });
     } catch (err) {
       next(err);
@@ -437,14 +471,18 @@ export function createProjectsRouter(
     try {
       const projectId = req.params.projectId!;
       const nodeId = req.params.nodeId!;
+      if (!uuidSchema.safeParse(nodeId).success) {
+        res.status(400).json({ error: "Invalid node ID." });
+        return;
+      }
       const nodes = await db.listProjectNodes(projectId);
-      const target = nodes.find((n) => n.id === nodeId);
+      const target = nodes.find((n) => sameUuid(n.id, nodeId));
       if (!target) {
         res.status(404).json({ error: "Node not found." });
         return;
       }
 
-      const deleted = await deleteSubtreeFromProject(nodes, nodeId, async (n) => {
+      const deleted = await deleteSubtreeFromProject(nodes, target.id, async (n) => {
         if (n.nodeType === "text_file") {
           await yjs.dropNodeDoc(projectId, n.id);
         }
@@ -468,7 +506,11 @@ export function createProjectsRouter(
     async (req, res, next) => {
       try {
         const projectId = req.params.projectId!;
-        const parentIdRaw = typeof req.body?.parentId === "string" && req.body.parentId ? req.body.parentId : null;
+        const parentIdRaw = typeof req.body?.parentId === "string" && req.body.parentId ? req.body.parentId.trim() : null;
+        if (parentIdRaw && !uuidSchema.safeParse(parentIdRaw).success) {
+          res.status(400).json({ error: "Invalid parentId UUID." });
+          return;
+        }
         const overwrite = req.body?.overwrite === "true" || req.body?.overwrite === true;
         const files = (req.files as Express.Multer.File[] | undefined) ?? [];
 
@@ -479,7 +521,7 @@ export function createProjectsRouter(
 
         let nodes = await db.listProjectNodes(projectId);
         if (parentIdRaw) {
-          const parent = nodes.find((n) => n.id === parentIdRaw);
+          const parent = nodes.find((n) => sameUuid(n.id, parentIdRaw));
           if (!parent || parent.nodeType !== "folder") {
             res.status(400).json({ error: "Target parent folder not found." });
             return;
@@ -503,7 +545,7 @@ export function createProjectsRouter(
           const isText = TEXT_EXTENSIONS.has(ext) && ext !== ".svg";
           const existingSameParent = nodes.find(
             (n) =>
-              (n.parentId ?? null) === parentIdRaw &&
+              (parentIdRaw === null ? n.parentId === null : sameUuid(n.parentId, parentIdRaw)) &&
               normalizeNodeName(n.name).toLowerCase() === normalizeNodeName(rawBaseName).toLowerCase()
           );
 
@@ -518,8 +560,17 @@ export function createProjectsRouter(
               res.status(409).json({ error: `"${existingSameParent.name}" is a folder.` });
               return;
             }
+            if (
+              (isText && existingSameParent.nodeType !== "text_file") ||
+              (!isText && existingSameParent.nodeType !== "binary_asset")
+            ) {
+              res.status(409).json({
+                error: `Cannot overwrite ${existingSameParent.nodeType} "${existingSameParent.name}" with an incompatible file type. Delete it first.`,
+              });
+              return;
+            }
 
-            if (isText && existingSameParent.nodeType === "text_file") {
+            if (isText) {
               await yjs.dropNodeDoc(projectId, existingSameParent.id);
               await db.updateProjectNodeContent(existingSameParent.id, file.buffer.toString("utf8"));
             } else {
@@ -589,8 +640,12 @@ export function createProjectsRouter(
     try {
       const projectId = req.params.projectId!;
       const nodeId = req.params.nodeId!;
+      if (!uuidSchema.safeParse(nodeId).success) {
+        res.status(400).json({ error: "Invalid node ID." });
+        return;
+      }
       const node = await db.getProjectNodeById(nodeId);
-      if (!node || node.projectId !== projectId) {
+      if (!node || !sameUuid(node.projectId, projectId)) {
         res.status(404).json({ error: "Node not found." });
         return;
       }
@@ -614,6 +669,8 @@ export function createProjectsRouter(
       const buffer = await downloadAssetBuffer(node.storagePath);
       res.setHeader("Content-Type", node.mimeType || "application/octet-stream");
       res.setHeader("Cache-Control", "no-store");
+      res.setHeader("X-Content-Type-Options", "nosniff");
+      res.setHeader("Content-Security-Policy", "default-src 'none'; sandbox");
       res.send(buffer);
     } catch (err) {
       next(err);

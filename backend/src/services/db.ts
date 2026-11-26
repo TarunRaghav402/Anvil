@@ -192,6 +192,31 @@ export const db = {
     );
   },
 
+  async updateUser(
+    id: string,
+    data: {
+      username?: string;
+      planTier?: string;
+    }
+  ): Promise<void> {
+    const updateData: Record<string, unknown> = {};
+    if (data.username) {
+      const clean = normalizeNodeName(data.username).trim();
+      updateData.username = clean;
+      updateData.usernameLower = clean.toLowerCase();
+    }
+    if (data.planTier) {
+      updateData.planTier = data.planTier.trim();
+    }
+
+    await execWrite(
+      `mutation UpdateUser($id: String!, $data: User_Data!) {
+        user_update(id: $id, data: $data)
+      }`,
+      { id, data: updateData }
+    );
+  },
+
   async getProjectById(id: string): Promise<DbProject | null> {
     const data = await execRead<{ project: DbProject | null }>(
       `query GetProjectById($id: UUID!) {

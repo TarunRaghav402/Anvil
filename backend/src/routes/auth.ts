@@ -3,7 +3,7 @@ import rateLimit from "express-rate-limit";
 import { z } from "zod";
 import { env } from "../config/env.js";
 import { adminAuth } from "../config/firebase.js";
-import { verifyFirebaseToken } from "../middleware/auth.js";
+import { requireVerifiedUser, verifyFirebaseToken } from "../middleware/auth.js";
 import { db, DbError } from "../services/db.js";
 import {
   isSmtpConfigured,
@@ -11,6 +11,7 @@ import {
   verifyOtp,
 } from "../services/emailOtpService.js";
 import { normalizeNodeName } from "../utils/filenames.js";
+import { resolveUserPlanTier } from "../../../appConfig.js";
 
 export const authRouter = Router();
 
@@ -45,8 +46,14 @@ const otpCodeSchema = z
   .regex(/^\d{6}$/, "Verification code must be 6 digits.");
 
 async function verifyFirebasePassword(email: string, password: string): Promise<boolean> {
-  const apiKey =
-    env.FIREBASE_WEB_API_KEY?.trim() || env.VITE_FIREBASE_API_KEY?.trim() || "anvil-local-api-key";
+  const configuredKey = env.FIREBASE_WEB_API_KEY?.trim() || env.VITE_FIREBASE_API_KEY?.trim();
+  if (!configuredKey && !env.USE_FIREBASE_EMULATORS) {
+    throw Object.assign(
+      new Error("Firebase Web API key is not configured on the server."),
+      { statusCode: 503 }
+    );
+  }
+  const apiKey = configuredKey || "anvil-local-api-key";
   const baseUrl = env.USE_FIREBASE_EMULATORS
     ? `http://${env.FIREBASE_AUTH_EMULATOR_HOST}/identitytoolkit.googleapis.com/v1`
     : "https://identitytoolkit.googleapis.com/v1";
@@ -121,12 +128,17 @@ authRouter.post("/register", authLimiter, verifyFirebaseToken, async (req, res, 
       return;
     }
 
+    const planTier = resolveUserPlanTier({ username: parsed.data.username, email }, "free", {
+      adminEmails: env.ADMIN_EMAILS,
+      trustAdminTier: false,
+    });
+
     try {
       await db.createUser({
         id: uid,
         username: parsed.data.username,
         email,
-        planTier: "free",
+        planTier,
       });
     } catch (err) {
       if (err instanceof DbError && err.statusCode === 409) {
@@ -335,7 +347,28 @@ authRouter.post("/reset-password", strictCodeLimiter, async (req, res, next) => 
 authRouter.get("/me", verifyFirebaseToken, async (req, res, next) => {
   try {
     const { uid, email, emailVerified } = req.auth!;
-    const user = await db.getUserById(uid);
+    let user = await db.getUserById(uid);
+    let role = "Developer";
+    try {
+      const fbUser = await adminAuth.getUser(uid);
+      if (fbUser.customClaims?.role) {
+        role = String(fbUser.customClaims.role);
+      }
+    } catch {
+      // Fallback
+    }
+
+    if (user) {
+      const resolvedTier = resolveUserPlanTier(
+        { username: user.username, email: user.email },
+        user.planTier,
+        { adminEmails: env.ADMIN_EMAILS, trustAdminTier: false }
+      );
+      if (user.planTier !== resolvedTier) {
+        user = { ...user, planTier: resolvedTier };
+      }
+      user = { ...user, role } as any;
+    }
     res.json({
       uid,
       email,
@@ -346,3 +379,154 @@ authRouter.get("/me", verifyFirebaseToken, async (req, res, next) => {
     next(err);
   }
 });
+
+// Update user profile (username, role) – email cannot be changed
+authRouter.patch(
+  "/profile",
+  authLimiter,
+  verifyFirebaseToken,
+  requireVerifiedUser,
+  async (req, res, next) => {
+    try {
+      const schema = z.object({
+        username: usernameSchema.optional(),
+        role: z.string().trim().min(2).max(40).optional(),
+      });
+      const parsed = schema.safeParse(req.body);
+      if (!parsed.success) {
+        res.status(400).json({ error: parsed.error.issues[0]?.message ?? "Invalid update payload." });
+        return;
+      }
+
+      const { uid } = req.auth!;
+      const currentUser = await db.getUserById(uid);
+      if (!currentUser) {
+        res.status(404).json({ error: "User not found." });
+        return;
+      }
+
+      const newUsername = parsed.data.username;
+      if (newUsername && newUsername.toLowerCase() !== currentUser.usernameLower) {
+        // Check username availability
+        const existing = await db.getUserByUsername(newUsername);
+        if (existing && existing.id !== uid) {
+          res.status(409).json({ error: "Username is already taken." });
+          return;
+        }
+
+        // Update in Data Connect / PostgreSQL
+        await db.updateUser(uid, { username: newUsername });
+
+        // Update in Firebase Cloud Auth displayName
+        try {
+          await adminAuth.updateUser(uid, { displayName: newUsername });
+        } catch (err) {
+          console.warn("[Anvil Auth] Failed to update Firebase displayName:", err);
+        }
+      }
+
+      // Update role if provided (stored in Firebase Auth custom claims)
+      let assignedRole = "Developer";
+      try {
+        const fbUser = await adminAuth.getUser(uid);
+        const currentClaims = fbUser.customClaims || {};
+        if (parsed.data.role) {
+          assignedRole = parsed.data.role;
+          await adminAuth.setCustomUserClaims(uid, {
+            ...currentClaims,
+            role: assignedRole,
+          });
+        } else if (currentClaims.role) {
+          assignedRole = String(currentClaims.role);
+        }
+      } catch (err) {
+        console.warn("[Anvil Auth] Failed to set role claims:", err);
+      }
+
+      const updatedUser = await db.getUserById(uid);
+      const resolvedTier = resolveUserPlanTier(
+        { username: updatedUser?.username, email: updatedUser?.email },
+        updatedUser?.planTier,
+        { adminEmails: env.ADMIN_EMAILS, trustAdminTier: false }
+      );
+
+      res.json({
+        user: updatedUser ? { ...updatedUser, planTier: resolvedTier, role: assignedRole } : null,
+        message: "Profile updated successfully.",
+      });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+// Upgrade / Manage Subscription Plan (gated by ENABLE_PAID_TIERS feature flag)
+authRouter.post(
+  "/subscribe",
+  authLimiter,
+  verifyFirebaseToken,
+  requireVerifiedUser,
+  async (req, res, next) => {
+    try {
+      const schema = z.object({
+        planTier: z.enum(["pro", "free"]),
+      });
+      const parsed = schema.safeParse(req.body);
+      if (!parsed.success) {
+        res.status(400).json({ error: "Invalid plan selection." });
+        return;
+      }
+
+      if (parsed.data.planTier === "pro" && !env.ENABLE_PAID_TIERS) {
+        res.status(403).json({
+          error:
+            "Paid plans are currently disabled (ENABLE_PAID_TIERS=false). Billing integration is required before self-service upgrades are allowed.",
+        });
+        return;
+      }
+
+      const { uid } = req.auth!;
+      const user = await db.getUserById(uid);
+      if (!user) {
+        res.status(404).json({ error: "User not found." });
+        return;
+      }
+
+      // Admins always keep their master status
+      const isMasterAdmin =
+        resolveUserPlanTier({ username: user.username, email: user.email }, user.planTier, {
+          adminEmails: env.ADMIN_EMAILS,
+          trustAdminTier: false,
+        }) === "admin";
+      const targetTier = isMasterAdmin ? "admin" : parsed.data.planTier;
+
+      await db.updateUser(uid, { planTier: targetTier });
+
+      // Also update custom claims in Firebase Auth for real-time verification
+      try {
+        const fbUser = await adminAuth.getUser(uid);
+        const currentClaims = fbUser.customClaims || {};
+        await adminAuth.setCustomUserClaims(uid, {
+          ...currentClaims,
+          planTier: targetTier,
+        });
+      } catch (err) {
+        console.warn("[Anvil Auth] Failed to set planTier claim in Firebase:", err);
+      }
+
+      const updated = await db.getUserById(uid);
+      const resolvedTier = resolveUserPlanTier(
+        { username: updated?.username, email: updated?.email },
+        updated?.planTier,
+        { adminEmails: env.ADMIN_EMAILS, trustAdminTier: false }
+      );
+
+      res.json({
+        user: updated ? { ...updated, planTier: resolvedTier } : null,
+        message: targetTier === "pro" ? "Upgraded to Anvil Pro successfully!" : "Plan changed to Free.",
+      });
+    } catch (err) {
+      next(err);
+    }
+  }
+);

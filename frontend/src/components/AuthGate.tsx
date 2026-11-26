@@ -1,6 +1,8 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   createUserWithEmailAndPassword,
+  sendEmailVerification,
+  sendPasswordResetEmail,
   signInWithEmailAndPassword,
   signOut,
   updateProfile,
@@ -39,8 +41,6 @@ function formatFirebaseAuthError(err: unknown): string {
 
 export const AuthGate: React.FC<AuthGateProps> = ({ firebaseUser, onVerified }) => {
   const [view, setView] = useState<"login" | "register" | "forgot">("login");
-  // UI state for password visibility toggle
-  const [showPassword, setShowPassword] = useState(false);
 
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
@@ -64,31 +64,63 @@ export const AuthGate: React.FC<AuthGateProps> = ({ firebaseUser, onVerified }) 
   const [confirmPassword, setConfirmPassword] = useState("");
   const [emulatorResetCode, setEmulatorResetCode] = useState<string | null>(null);
 
+  const checkVerificationStatus = useCallback(async () => {
+    if (!auth.currentUser) return false;
+    await auth.currentUser.reload();
+    if (auth.currentUser.emailVerified) {
+      await auth.currentUser.getIdToken(true);
+      await onVerified();
+      return true;
+    }
+    return false;
+  }, [onVerified]);
+
   const requestVerificationCode = useCallback(async () => {
     setError(null);
     setBusy(true);
     try {
-      const res = await api.sendVerificationCode();
-      if (res.alreadyVerified) {
-        await auth.currentUser?.reload();
-        await auth.currentUser?.getIdToken(true);
-        await onVerified();
+      if (await checkVerificationStatus()) {
         return;
       }
-      setVerifyDelivery(res.delivery);
-      setCanQuickVerify(Boolean(res.canQuickVerify));
-      setEmulatorVerifyCode(res.emulatorCode ?? null);
-      setInfo(
-        res.delivery === "smtp"
-          ? `A 6-digit verification code was sent to ${auth.currentUser?.email}.`
-          : `6-digit verification code generated for ${auth.currentUser?.email}.`
-      );
+      let firebaseEmailSent = false;
+      if (auth.currentUser && !IS_EMULATOR_MODE) {
+        // Send official verification email directly through Google Firebase Cloud
+        try {
+          await sendEmailVerification(auth.currentUser);
+          firebaseEmailSent = true;
+        } catch (err) {
+          console.warn("Firebase sendEmailVerification notice:", err);
+        }
+      }
+      try {
+        const res = await api.sendVerificationCode();
+        if (res.alreadyVerified) {
+          await checkVerificationStatus();
+          return;
+        }
+        setVerifyDelivery(res.delivery);
+        setCanQuickVerify(Boolean(res.canQuickVerify));
+        setEmulatorVerifyCode(res.emulatorCode ?? null);
+        setInfo(
+          firebaseEmailSent || res.delivery === "smtp"
+            ? `Verification email sent to ${auth.currentUser?.email}. Check your inbox!`
+            : `6-digit verification code generated for ${auth.currentUser?.email}.`
+        );
+      } catch (otpErr) {
+        if (firebaseEmailSent) {
+          setInfo(
+            `Firebase verification link sent to ${auth.currentUser?.email}. Click the link in your inbox, then click "I Verified My Email".`
+          );
+        } else {
+          throw otpErr;
+        }
+      }
     } catch (err) {
       setError(formatFirebaseAuthError(err));
     } finally {
       setBusy(false);
     }
-  }, [onVerified]);
+  }, [checkVerificationStatus]);
 
   useEffect(() => {
     if (!firebaseUser || firebaseUser.emailVerified) {
@@ -210,10 +242,10 @@ export const AuthGate: React.FC<AuthGateProps> = ({ firebaseUser, onVerified }) 
     setInfo(null);
     setBusy(true);
     try {
-      const res = await api.forgotPassword(forgotEmail.trim());
-      setEmulatorResetCode(res.emulatorCode ?? null);
-      setForgotStep("reset");
-      setInfo(res.message);
+      const cleanEmail = forgotEmail.trim();
+      // Send real password reset email directly via Google Firebase
+      await sendPasswordResetEmail(auth, cleanEmail);
+      setInfo(`Firebase has sent a password reset email to ${cleanEmail}. Check your inbox (and spam folder)!`);
     } catch (err) {
       setError(formatFirebaseAuthError(err));
     } finally {
@@ -282,20 +314,20 @@ export const AuthGate: React.FC<AuthGateProps> = ({ firebaseUser, onVerified }) 
             </div>
           </div>
 
-          {IS_EMULATOR_MODE && verifyDelivery === "emulator" && (
+          {verifyDelivery === "emulator" && (
             <div className="bg-[#1e1e1e] border border-[#3c3c3c] p-3 mb-4 text-[11px] text-[#9cdcfe] space-y-1">
               <div>
-                <strong>Local Emulator Mode</strong> (SMTP not configured in <code>.env</code>):
+                <strong>Local Dev Mode</strong> (SMTP not configured in <code>.env</code>):
                 {emulatorVerifyCode ? (
                   <>
                     {" "}
                     your verification code is{" "}
-                    <span className="font-mono font-bold text-white">{emulatorVerifyCode}</span>.
+                    <span className="font-mono font-bold text-white text-[13px]">{emulatorVerifyCode}</span>.
                   </>
                 ) : null}
               </div>
               <div className="text-[#858585]">
-                To receive real codes in Gmail, set <code>SMTP_HOST</code>, <code>SMTP_USER</code>,
+                To send real emails to your Gmail inbox, configure <code>SMTP_HOST</code>, <code>SMTP_USER</code>,
                 and <code>SMTP_PASS</code> in <code>.env</code>.
               </div>
             </div>
@@ -349,9 +381,30 @@ export const AuthGate: React.FC<AuthGateProps> = ({ firebaseUser, onVerified }) 
                 onClick={() => void handleQuickVerify()}
                 className="w-full bg-[#2ea043] hover:bg-[#3fb950] disabled:opacity-50 text-white py-2 px-3 text-[13px] font-medium cursor-pointer"
               >
-                Verify Now (Emulator Quick Verify)
+                Verify Now (Quick Verify)
               </button>
             )}
+
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => {
+                setError(null);
+                setBusy(true);
+                void checkVerificationStatus()
+                  .then((verified) => {
+                    if (!verified) {
+                      setError("Email is not verified yet. Open the link in your inbox or enter the 6-digit code.");
+                    }
+                  })
+                  .catch((err) => setError(formatFirebaseAuthError(err)))
+                  .finally(() => setBusy(false));
+              }}
+              className="w-full bg-[#2a2d2e] hover:bg-[#3c3c3c] border border-[#3c3c3c] disabled:opacity-50 text-white py-2 px-3 text-[13px] flex items-center justify-center gap-2 cursor-pointer"
+            >
+              <CheckCircle2 className="w-3.5 h-3.5 text-[#4ec9b0]" />
+              I Verified My Email — Continue
+            </button>
 
             <button
               type="button"

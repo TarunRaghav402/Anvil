@@ -232,8 +232,10 @@ All environment variables are configured in a single root `.env` file (copied fr
 | `FIREBASE_SERVICE_ACCOUNT_JSON`           | Conditional  | Backend  | Inline service account JSON string (prod PaaS alternative)      | `""`                                                      |
 | `SESSION_HOST_GRACE_MS`                   | Optional     | Backend  | Milliseconds before host disconnect ends non-persistent session | `30000`                                                   |
 | `ENABLE_PAID_TIERS`                       | Optional     | Backend  | Scaffolded paid tier toggle (`false` = free mode only)          | `false`                                                   |
+| `ADMIN_EMAILS`                            | Optional     | Backend  | Comma-separated admin account emails (kept server-side only)    | `""`                                                      |
 | `YJS_SAVE_DEBOUNCE_MS`                    | Optional     | Backend  | Debounce delay (ms) before flushing Yjs docs to SQL             | `2000`                                                    |
 | `PREVIEW_TOKEN_SECRET`                    | **Required** | Backend  | HMAC secret (`>= 16` chars) for Live Preview capability tokens  | `replace-with-random-32-char-secret-change-in-production` |
+| `FIREBASE_WEB_API_KEY`                    | Optional     | Backend  | Server-side Firebase Web API key fallback for password login    | `""`                                                      |
 | `MAX_UPLOAD_SIZE_MB`                      | Optional     | Backend  | Max file upload size in megabytes (1–100)                       | `15`                                                      |
 | `GIT_TIMEOUT_MS`                          | Optional     | Backend  | Subprocess timeout (ms) for Git Commit & Push                   | `60000`                                                   |
 | `VITE_API_URL`                            | Optional     | Frontend | Backend REST base URL (empty uses Vite proxy / same origin)     | `http://localhost:4001`                                   |

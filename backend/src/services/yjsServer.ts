@@ -9,10 +9,15 @@ import * as decoding from "lib0/decoding";
 import { env } from "../config/env.js";
 import { verifyVerifiedRegisteredUser } from "../middleware/auth.js";
 import { assertProjectAccess } from "../middleware/accessControl.js";
-import { db } from "./db.js";
+import { db, sameUuid } from "./db.js";
 
 const MESSAGE_SYNC = 0;
 const MESSAGE_AWARENESS = 1;
+const UUID_REGEX = /^[0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12}$/i;
+
+function canonicalUuid(id: string): string {
+  return id.replace(/-/g, "").toLowerCase();
+}
 
 interface ClientMeta {
   ws: WebSocket;
@@ -46,7 +51,7 @@ export class YjsCollaborationServer {
 
   constructor(onDocSaved?: PreviewReloadCallback) {
     this.onDocSaved = onDocSaved;
-    this.wss = new WebSocketServer({ noServer: true });
+    this.wss = new WebSocketServer({ noServer: true, maxPayload: 8 * 1024 * 1024 });
   }
 
   attachUpgradeHandler(httpServer: HttpServer): void {
@@ -73,17 +78,20 @@ export class YjsCollaborationServer {
       const [projectId, nodeId] = roomSegment.split(":");
       const token = reqUrl.searchParams.get("token") ?? "";
 
-      if (!projectId || !nodeId || !token) {
+      if (!projectId || !nodeId || !token || !UUID_REGEX.test(projectId) || !UUID_REGEX.test(nodeId)) {
         socket.write("HTTP/1.1 400 Bad Request\r\n\r\n");
         socket.destroy();
         return;
       }
 
-      const { user } = await verifyVerifiedRegisteredUser(token);
-      await assertProjectAccess(projectId, user.id);
+      const canonicalProjId = canonicalUuid(projectId);
+      const canonicalNodeId = canonicalUuid(nodeId);
 
-      const node = await db.getProjectNodeById(nodeId);
-      if (!node || node.projectId !== projectId || node.nodeType !== "text_file") {
+      const { user } = await verifyVerifiedRegisteredUser(token);
+      await assertProjectAccess(canonicalProjId, user.id);
+
+      const node = await db.getProjectNodeById(canonicalNodeId);
+      if (!node || !sameUuid(node.projectId, canonicalProjId) || node.nodeType !== "text_file") {
         socket.write("HTTP/1.1 404 Not Found\r\n\r\n");
         socket.destroy();
         return;
@@ -91,10 +99,10 @@ export class YjsCollaborationServer {
 
       // Load/hydrate Yjs doc BEFORE completing HTTP 101 upgrade so ws.on("message")
       // attaches synchronously and never misses the client's initial SyncStep1.
-      const managed = await this.getOrLoadDoc(projectId, nodeId);
+      const managed = await this.getOrLoadDoc(canonicalProjId, canonicalNodeId);
 
       this.wss.handleUpgrade(request, socket, head, (ws) => {
-        this.handleConnection(ws, managed, projectId, nodeId, user.id, user.username);
+        this.handleConnection(ws, managed, canonicalProjId, canonicalNodeId, user.id, user.username);
       });
     } catch (err: unknown) {
       const status =
@@ -108,7 +116,9 @@ export class YjsCollaborationServer {
   }
 
   private async getOrLoadDoc(projectId: string, nodeId: string): Promise<ManagedDoc> {
-    const roomKey = `${projectId}:${nodeId}`;
+    const canonProj = canonicalUuid(projectId);
+    const canonNode = canonicalUuid(nodeId);
+    const roomKey = `${canonProj}:${canonNode}`;
     const existing = this.docs.get(roomKey);
     if (existing && !existing.destroyed) {
       return existing;
@@ -352,19 +362,20 @@ export class YjsCollaborationServer {
   }
 
   async flushProjectDocs(projectId: string): Promise<void> {
-    const targets = Array.from(this.docs.values()).filter((d) => d.projectId === projectId);
+    const canonProj = canonicalUuid(projectId);
+    const targets = Array.from(this.docs.values()).filter((d) => canonicalUuid(d.projectId) === canonProj);
     await Promise.all(targets.map((d) => this.flushDoc(d)));
   }
 
   async flushNodeDoc(projectId: string, nodeId: string): Promise<void> {
-    const doc = this.docs.get(`${projectId}:${nodeId}`);
+    const doc = this.docs.get(`${canonicalUuid(projectId)}:${canonicalUuid(nodeId)}`);
     if (doc) {
       await this.flushDoc(doc);
     }
   }
 
   getLiveText(projectId: string, nodeId: string, fallback: string | null): string {
-    const managed = this.docs.get(`${projectId}:${nodeId}`);
+    const managed = this.docs.get(`${canonicalUuid(projectId)}:${canonicalUuid(nodeId)}`);
     if (managed && !managed.destroyed) {
       return managed.doc.getText("monaco").toString();
     }
@@ -372,7 +383,7 @@ export class YjsCollaborationServer {
   }
 
   async dropNodeDoc(projectId: string, nodeId: string): Promise<void> {
-    const key = `${projectId}:${nodeId}`;
+    const key = `${canonicalUuid(projectId)}:${canonicalUuid(nodeId)}`;
     const managed = this.docs.get(key);
     if (!managed) return;
     if (managed.saveTimer) {
@@ -395,8 +406,9 @@ export class YjsCollaborationServer {
   }
 
   disconnectUserFromProject(projectId: string, userId: string, code = 4403, reason = "Access revoked"): void {
+    const canonProj = canonicalUuid(projectId);
     for (const managed of this.docs.values()) {
-      if (managed.projectId !== projectId) continue;
+      if (canonicalUuid(managed.projectId) !== canonProj) continue;
       for (const client of Array.from(managed.clients)) {
         if (client.userId === userId) {
           try {

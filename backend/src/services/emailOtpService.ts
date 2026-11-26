@@ -155,7 +155,15 @@ export async function sendEmailOtp(
     return { delivery: "emulator", emulatorCode: code };
   }
 
-  throw new Error(
-    "Email delivery is not configured. Set SMTP_HOST, SMTP_USER, and SMTP_PASS in .env."
+  if (env.NODE_ENV !== "production") {
+    console.log(
+      `[${APP_NAME} Dev OTP] (${purpose}) for ${cleanEmail}: ${code} (logged server-side only; configure SMTP_* in .env to send emails)`
+    );
+    return { delivery: "emulator" };
+  }
+
+  throw Object.assign(
+    new Error("Email delivery is not configured. Set SMTP_HOST, SMTP_USER, and SMTP_PASS in .env."),
+    { statusCode: 503 }
   );
 }

@@ -46,9 +46,12 @@ export const LivePreviewPane: React.FC<LivePreviewPaneProps> = ({
 
     // Refresh short-lived capability token every 20 minutes
     const timer = setInterval(() => {
-      void api.issuePreviewToken(projectId).then((r) => {
-        if (!cancelled) setPreviewToken(r.token);
-      });
+      void api
+        .issuePreviewToken(projectId)
+        .then((r) => {
+          if (!cancelled) setPreviewToken(r.token);
+        })
+        .catch(() => undefined);
     }, 20 * 60 * 1000);
 
     return () => {

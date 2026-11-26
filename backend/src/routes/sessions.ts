@@ -127,6 +127,11 @@ export function createSessionsRouter(sessions: SessionManager): Router {
   // Update user's role in an active session
   router.patch("/:sessionId/role", async (req, res, next) => {
     try {
+      const sessionId = req.params.sessionId!;
+      if (!uuidSchema.safeParse(sessionId).success) {
+        res.status(400).json({ error: "Invalid session ID." });
+        return;
+      }
       const schema = z.object({ role: roleSchema });
       const parsed = schema.safeParse(req.body);
       if (!parsed.success) {
@@ -134,7 +139,7 @@ export function createSessionsRouter(sessions: SessionManager): Router {
         return;
       }
 
-      const session = await db.getSessionById(req.params.sessionId!);
+      const session = await db.getSessionById(sessionId);
       if (!session || session.status !== "active") {
         res.status(404).json({ error: "Active session not found." });
         return;
@@ -161,7 +166,12 @@ export function createSessionsRouter(sessions: SessionManager): Router {
   // Host explicitly ends the session
   router.post("/:sessionId/end", async (req, res, next) => {
     try {
-      const session = await db.getSessionById(req.params.sessionId!);
+      const sessionId = req.params.sessionId!;
+      if (!uuidSchema.safeParse(sessionId).success) {
+        res.status(400).json({ error: "Invalid session ID." });
+        return;
+      }
+      const session = await db.getSessionById(sessionId);
       if (!session) {
         res.status(404).json({ error: "Session not found." });
         return;

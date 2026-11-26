@@ -2,6 +2,8 @@ import React, { useCallback, useEffect, useState } from "react";
 import { onIdTokenChanged, signOut, type User } from "firebase/auth";
 import { APP_NAME, type ProjectRole } from "../../appConfig";
 import { AuthGate } from "./components/AuthGate";
+import { DesktopOnlyGate } from "./components/DesktopOnlyGate";
+import { IntroSplash } from "./components/IntroSplash";
 import { Lobby } from "./components/Lobby";
 import { Workspace } from "./components/Workspace";
 import { auth } from "./config/firebase";
@@ -11,6 +13,7 @@ import type { AnvilUser } from "./types/anvil";
 export const App: React.FC = () => {
   const [firebaseUser, setFirebaseUser] = useState<User | null>(auth.currentUser);
   const [authReady, setAuthReady] = useState(false);
+  const [showIntro, setShowIntro] = useState(true);
   const [dbUser, setDbUser] = useState<AnvilUser | null>(null);
   const [activeProject, setActiveProject] = useState<{
     projectId: string;
@@ -56,55 +59,70 @@ export const App: React.FC = () => {
     await signOut(auth);
   };
 
-  if (!authReady) {
-    return (
-      <div className="h-screen w-screen bg-[#1e1e1e] text-[#cccccc] flex items-center justify-center text-[13px]">
-        Initializing {APP_NAME}...
-      </div>
-    );
-  }
+  const renderContent = () => {
+    if (!authReady) {
+      return (
+        <div className="h-screen w-screen bg-[#1e1e1e] text-[#cccccc] flex items-center justify-center text-[13px]">
+          Initializing {APP_NAME}...
+        </div>
+      );
+    }
 
-  if (!firebaseUser || !firebaseUser.emailVerified || !dbUser) {
-    return (
-      <AuthGate
-        firebaseUser={firebaseUser}
-        onVerified={async () => {
-          if (auth.currentUser) {
-            setFirebaseUser(auth.currentUser);
-            await syncMe(auth.currentUser);
-          }
-        }}
-      />
-    );
-  }
+    if (!firebaseUser || !firebaseUser.emailVerified || !dbUser) {
+      return (
+        <AuthGate
+          firebaseUser={firebaseUser}
+          onVerified={async () => {
+            if (auth.currentUser) {
+              setFirebaseUser(auth.currentUser);
+              await syncMe(auth.currentUser);
+            }
+          }}
+        />
+      );
+    }
 
-  if (!activeProject) {
+    if (!activeProject) {
+      return (
+        <Lobby
+          user={dbUser}
+          initialInviteCode={initialInviteCode}
+          bannerNotice={lobbyNotice}
+          onClearNotice={() => setLobbyNotice(null)}
+          onOpenProject={(projectId, role) => {
+            setLobbyNotice(null);
+            setActiveProject({ projectId, role });
+          }}
+          onSignOut={handleSignOut}
+          onUserUpdated={(updated) => setDbUser(updated)}
+        />
+      );
+    }
+
     return (
-      <Lobby
+      <Workspace
+        projectId={activeProject.projectId}
+        initialRole={activeProject.role}
         user={dbUser}
-        initialInviteCode={initialInviteCode}
-        bannerNotice={lobbyNotice}
-        onClearNotice={() => setLobbyNotice(null)}
-        onOpenProject={(projectId, role) => {
-          setLobbyNotice(null);
-          setActiveProject({ projectId, role });
+        onExitToLobby={(notice) => {
+          setActiveProject(null);
+          if (notice) setLobbyNotice(notice);
         }}
         onSignOut={handleSignOut}
+        onUserUpdated={(updated) => setDbUser(updated)}
       />
     );
-  }
+  };
 
   return (
-    <Workspace
-      projectId={activeProject.projectId}
-      initialRole={activeProject.role}
-      user={dbUser}
-      onExitToLobby={(notice) => {
-        setActiveProject(null);
-        if (notice) setLobbyNotice(notice);
-      }}
-      onSignOut={handleSignOut}
-    />
+    <DesktopOnlyGate>
+      <>
+        {renderContent()}
+        {showIntro && (
+          <IntroSplash authReady={authReady} onFinish={() => setShowIntro(false)} />
+        )}
+      </>
+    </DesktopOnlyGate>
   );
 };
 

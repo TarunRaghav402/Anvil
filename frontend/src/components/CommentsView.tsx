@@ -27,6 +27,7 @@ export const CommentsView: React.FC<CommentsViewProps> = ({
   currentUserId,
   isOwner,
   pendingPinTarget,
+  onClearPendingPin,
   onJumpToComment,
   onCreateComment,
   onToggleResolve,
@@ -85,6 +86,7 @@ export const CommentsView: React.FC<CommentsViewProps> = ({
         body: newBody.trim(),
       });
       setNewBody("");
+      onClearPendingPin();
     } finally {
       setBusy(false);
     }

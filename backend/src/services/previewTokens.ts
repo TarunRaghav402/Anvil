@@ -12,7 +12,10 @@ interface TokenPayload {
 const revokedUsersPerProject = new Map<string, number>();
 
 export function revokePreviewTokensForUser(projectId: string, userId: string): void {
-  revokedUsersPerProject.set(`${projectId}:${userId}`, Date.now());
+  const canonicalProjectId = projectId.replace(/-/g, "").toLowerCase();
+  const now = Date.now();
+  revokedUsersPerProject.set(`${projectId}:${userId}`, now);
+  revokedUsersPerProject.set(`${canonicalProjectId}:${userId}`, now);
 }
 
 export function issuePreviewToken(projectId: string, userId: string, ttlMs = 30 * 60 * 1000): string {
@@ -52,10 +55,18 @@ export function verifyPreviewToken(token: string, expectedProjectId: string): { 
 
   try {
     const payload = JSON.parse(Buffer.from(encoded, "base64url").toString("utf8")) as TokenPayload;
-    if (!payload.uid || payload.projectId !== expectedProjectId || payload.exp < Date.now()) {
+    if (
+      !payload.uid ||
+      payload.projectId.replace(/-/g, "").toLowerCase() !==
+        expectedProjectId.replace(/-/g, "").toLowerCase() ||
+      payload.exp < Date.now()
+    ) {
       return null;
     }
-    const revokedAt = revokedUsersPerProject.get(`${expectedProjectId}:${payload.uid}`);
+    const canonicalProjectId = expectedProjectId.replace(/-/g, "").toLowerCase();
+    const revokedAt =
+      revokedUsersPerProject.get(`${expectedProjectId}:${payload.uid}`) ??
+      revokedUsersPerProject.get(`${canonicalProjectId}:${payload.uid}`);
     if (revokedAt && payload.iat <= revokedAt) {
       return null;
     }

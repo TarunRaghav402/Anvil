@@ -1,12 +1,14 @@
 import { Router, type Request, type Response } from "express";
 import { env } from "../config/env.js";
 import { AccessError, assertProjectAccess } from "../middleware/accessControl.js";
-import { db } from "../services/db.js";
+import { db, sameUuid } from "../services/db.js";
 import { verifyPreviewToken } from "../services/previewTokens.js";
 import { buildNodePathMap } from "../services/projectTree.js";
 import { downloadAssetBuffer } from "../services/storageService.js";
 import type { YjsCollaborationServer } from "../services/yjsServer.js";
 import { sanitizeProjectRelativePath } from "../utils/filenames.js";
+
+const UUID_REGEX = /^[0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12}$/i;
 
 export function createPreviewRouter(yjs: YjsCollaborationServer): Router {
   const router = Router();
@@ -14,6 +16,10 @@ export function createPreviewRouter(yjs: YjsCollaborationServer): Router {
   async function servePreview(req: Request, res: Response, rawAssetPath: string): Promise<void> {
     const projectId = req.params.projectId ?? "";
     const token = req.params.token ?? "";
+    if (!UUID_REGEX.test(projectId)) {
+      res.status(400).send("Invalid project ID.");
+      return;
+    }
 
     const verified = verifyPreviewToken(token, projectId);
     if (!verified) {
@@ -57,7 +63,7 @@ export function createPreviewRouter(yjs: YjsCollaborationServer): Router {
       return;
     }
 
-    // Security headers compatible with sandboxed iframe (Origin: null)
+    // Security headers compatible with sandboxed iframe AND standalone preview tab (enforces Origin: null)
     res.setHeader("Cache-Control", "no-store");
     res.setHeader("Access-Control-Allow-Origin", "*");
     res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
@@ -65,7 +71,7 @@ export function createPreviewRouter(yjs: YjsCollaborationServer): Router {
     res.removeHeader("X-Frame-Options");
     res.setHeader(
       "Content-Security-Policy",
-      `frame-ancestors 'self' ${env.FRONTEND_ORIGIN} http://localhost:* http://127.0.0.1:*`
+      `sandbox allow-scripts allow-forms allow-modals; frame-ancestors 'self' ${env.FRONTEND_ORIGIN} http://localhost:* http://127.0.0.1:*`
     );
 
     if (matchedNode.nodeType === "text_file") {
@@ -76,7 +82,7 @@ export function createPreviewRouter(yjs: YjsCollaborationServer): Router {
       return;
     }
 
-    if (matchedNode.nodeType === "binary_asset" && matchedNode.storagePath) {
+    if (matchedNode.nodeType === "binary_asset" && matchedNode.storagePath && sameUuid(matchedNode.projectId, projectId)) {
       const buffer = await downloadAssetBuffer(matchedNode.storagePath);
       res.setHeader("Content-Type", matchedNode.mimeType || "application/octet-stream");
       res.send(buffer);

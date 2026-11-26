@@ -1,10 +1,16 @@
 import crypto from "crypto";
 import type { Server as SocketIOServer, Socket } from "socket.io";
-import type { ProjectRole } from "../../../appConfig.js";
+import { PROJECT_ROLES, type ProjectRole } from "../../../appConfig.js";
 import { env } from "../config/env.js";
 import { assertProjectAccess } from "../middleware/accessControl.js";
 import { verifyVerifiedRegisteredUser } from "../middleware/auth.js";
-import { canSessionPersist, db, newUuid, type DbSession } from "./db.js";
+import { canSessionPersist, db, newUuid, sameUuid, type DbSession } from "./db.js";
+
+function parseValidProjectRole(raw: unknown): ProjectRole | null {
+  return typeof raw === "string" && (PROJECT_ROLES as readonly string[]).includes(raw)
+    ? (raw as ProjectRole)
+    : null;
+}
 import { revokePreviewTokensForUser } from "./previewTokens.js";
 import type { YjsCollaborationServer } from "./yjsServer.js";
 
@@ -114,18 +120,19 @@ export class SessionManager {
             }
 
             // Determine role from active session_members if present, else payload or 'coder'
+            const requestedRole = parseValidProjectRole(payload.role);
             const activeSession = await db.getActiveSessionForProject(payload.projectId);
-            let resolvedRole: ProjectRole = payload.role ?? "coder";
+            let resolvedRole: ProjectRole = requestedRole ?? "coder";
             if (activeSession) {
               const smList = await db.listSessionMembers(activeSession.id);
               const existingSm = smList.find((m) => m.userId === user.id);
               if (existingSm) {
-                resolvedRole = payload.role ?? existingSm.role;
-                if (payload.role && payload.role !== existingSm.role) {
+                resolvedRole = requestedRole ?? parseValidProjectRole(existingSm.role) ?? "coder";
+                if (requestedRole && requestedRole !== existingSm.role) {
                   await db.upsertSessionMember({
                     sessionId: activeSession.id,
                     userId: user.id,
-                    role: payload.role,
+                    role: requestedRole,
                   });
                 }
               }
@@ -159,22 +166,29 @@ export class SessionManager {
       socket.on("presence:active-file", (payload: { nodeId: string | null; filePath: string | null }) => {
         const meta = this.socketMeta.get(socket.id);
         if (!meta) return;
-        meta.activeNodeId = payload?.nodeId ?? null;
-        meta.activeFilePath = payload?.filePath ?? null;
+        const nextNodeId =
+          typeof payload?.nodeId === "string" && payload.nodeId.length <= 64 ? payload.nodeId : null;
+        const nextFilePath =
+          typeof payload?.filePath === "string" && payload.filePath.length <= 512
+            ? payload.filePath
+            : null;
+        meta.activeNodeId = nextNodeId;
+        meta.activeFilePath = nextFilePath;
         this.broadcastPresence(meta.projectId);
       });
 
       socket.on("presence:role", async (payload: { role: ProjectRole }) => {
         const meta = this.socketMeta.get(socket.id);
-        if (!meta || !payload?.role) return;
-        meta.role = payload.role;
+        const validRole = parseValidProjectRole(payload?.role);
+        if (!meta || !validRole) return;
+        meta.role = validRole;
         const activeSession = await db.getActiveSessionForProject(meta.projectId);
         if (activeSession) {
           await db
             .upsertSessionMember({
               sessionId: activeSession.id,
               userId: meta.userId,
-              role: payload.role,
+              role: validRole,
             })
             .catch(() => undefined);
         }
@@ -216,13 +230,13 @@ export class SessionManager {
   }
 
   private roomName(projectId: string): string {
-    return `project:${projectId}`;
+    return `project:${projectId.replace(/-/g, "").toLowerCase()}`;
   }
 
   getProjectPresence(projectId: string): OnlinePresenceEntry[] {
     const byUser = new Map<string, OnlinePresenceEntry>();
     for (const meta of this.socketMeta.values()) {
-      if (meta.projectId !== projectId) continue;
+      if (!sameUuid(meta.projectId, projectId)) continue;
       const existing = byUser.get(meta.userId);
       // Prefer socket entry that currently has an active file selected
       if (!existing || (meta.activeNodeId && !existing.activeNodeId)) {
@@ -281,7 +295,7 @@ export class SessionManager {
 
   private hasActiveHostSocket(projectId: string, hostId: string): boolean {
     for (const meta of this.socketMeta.values()) {
-      if (meta.projectId === projectId && meta.userId === hostId) {
+      if (sameUuid(meta.projectId, projectId) && meta.userId === hostId) {
         return true;
       }
     }
@@ -358,7 +372,7 @@ export class SessionManager {
     }
 
     const sessionId = newUuid();
-    const isPersistent = env.ENABLE_PAID_TIERS ? false : false;
+    const isPersistent = false;
     await db.createSession({
       id: sessionId,
       projectId,
@@ -421,7 +435,7 @@ export class SessionManager {
     this.yjs.disconnectUserFromProject(projectId, userId, 4403, reason);
 
     for (const [socketId, meta] of Array.from(this.socketMeta.entries())) {
-      if (meta.projectId === projectId && meta.userId === userId) {
+      if (sameUuid(meta.projectId, projectId) && meta.userId === userId) {
         const sock: Socket | undefined = this.io.sockets.sockets.get(socketId);
         if (sock) {
           sock.emit("access:revoked", { projectId, reason });

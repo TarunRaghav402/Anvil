@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { z } from "zod";
 import { requireProjectMember } from "../middleware/accessControl.js";
-import { db, newUuid } from "../services/db.js";
+import { db, newUuid, sameUuid } from "../services/db.js";
 import { buildNodePathMap } from "../services/projectTree.js";
 import type { SessionManager } from "../services/sessionManager.js";
 
@@ -47,7 +47,7 @@ export function createCommentsRouter(sessions: SessionManager): Router {
       }
 
       const node = await db.getProjectNodeById(parsed.data.nodeId);
-      if (!node || node.projectId !== projectId) {
+      if (!node || !sameUuid(node.projectId, projectId)) {
         res.status(404).json({ error: "Target file or asset not found." });
         return;
       }
@@ -55,7 +55,7 @@ export function createCommentsRouter(sessions: SessionManager): Router {
       let resolvedLine = parsed.data.lineNumber;
       if (parsed.data.parentCommentId) {
         const parent = await db.getCommentById(parsed.data.parentCommentId);
-        if (!parent || parent.projectId !== projectId) {
+        if (!parent || !sameUuid(parent.projectId, projectId)) {
           res.status(404).json({ error: "Parent comment not found." });
           return;
         }
@@ -85,6 +85,10 @@ export function createCommentsRouter(sessions: SessionManager): Router {
     try {
       const projectId = req.params.projectId!;
       const commentId = req.params.commentId!;
+      if (!uuidSchema.safeParse(commentId).success) {
+        res.status(400).json({ error: "Invalid comment ID." });
+        return;
+      }
       const schema = z.object({
         resolved: z.boolean(),
       });
@@ -95,14 +99,14 @@ export function createCommentsRouter(sessions: SessionManager): Router {
       }
 
       const comment = await db.getCommentById(commentId);
-      if (!comment || comment.projectId !== projectId) {
+      if (!comment || !sameUuid(comment.projectId, projectId)) {
         res.status(404).json({ error: "Comment not found." });
         return;
       }
 
-      await db.setCommentResolved(commentId, parsed.data.resolved);
+      await db.setCommentResolved(comment.id, parsed.data.resolved);
       sessions.emitCommentsUpdated(projectId);
-      const updated = await db.getCommentById(commentId);
+      const updated = await db.getCommentById(comment.id);
       res.json({ comment: updated });
     } catch (err) {
       next(err);
@@ -113,8 +117,12 @@ export function createCommentsRouter(sessions: SessionManager): Router {
     try {
       const projectId = req.params.projectId!;
       const commentId = req.params.commentId!;
+      if (!uuidSchema.safeParse(commentId).success) {
+        res.status(400).json({ error: "Invalid comment ID." });
+        return;
+      }
       const comment = await db.getCommentById(commentId);
-      if (!comment || comment.projectId !== projectId) {
+      if (!comment || !sameUuid(comment.projectId, projectId)) {
         res.status(404).json({ error: "Comment not found." });
         return;
       }
@@ -124,11 +132,11 @@ export function createCommentsRouter(sessions: SessionManager): Router {
       }
 
       const all = await db.listProjectComments(projectId);
-      const replies = all.filter((c) => c.parentCommentId === commentId);
+      const replies = all.filter((c) => sameUuid(c.parentCommentId, comment.id));
       for (const r of replies) {
         await db.deleteComment(r.id);
       }
-      await db.deleteComment(commentId);
+      await db.deleteComment(comment.id);
 
       sessions.emitCommentsUpdated(projectId);
       res.json({ deleted: true });

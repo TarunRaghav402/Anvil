@@ -27,10 +27,15 @@ export class AccessError extends Error {
  * Authoritative project membership check used by REST routes, Socket.io, Yjs WS,
  * preview routes, zip export, and Git push.
  */
+const UUID_REGEX = /^[0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12}$/i;
+
 export async function assertProjectAccess(
   projectId: string,
   userId: string
 ): Promise<ProjectAccessResult> {
+  if (!UUID_REGEX.test(projectId)) {
+    throw new AccessError("Invalid project ID.", 400);
+  }
   const project = await db.getProjectById(projectId);
   if (!project) {
     throw new AccessError("Project not found.", 404);

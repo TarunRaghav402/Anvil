@@ -138,6 +138,20 @@ export const api = {
     );
   },
 
+  updateProfile(input: { username?: string; role?: string }): Promise<{ user: AnvilUser; message: string }> {
+    return request("/api/auth/profile", {
+      method: "PATCH",
+      body: JSON.stringify(input),
+    });
+  },
+
+  subscribe(planTier: "pro" | "free"): Promise<{ user: AnvilUser; message: string }> {
+    return request("/api/auth/subscribe", {
+      method: "POST",
+      body: JSON.stringify({ planTier }),
+    });
+  },
+
   getMe(): Promise<{ uid: string; email: string; emailVerified: boolean; user: AnvilUser | null }> {
     return request("/api/auth/me");
   },

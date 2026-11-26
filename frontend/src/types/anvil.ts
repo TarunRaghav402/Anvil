@@ -6,6 +6,7 @@ export interface AnvilUser {
   usernameLower: string;
   email: string;
   planTier: string;
+  role?: string;
   createdAt: string;
 }
 

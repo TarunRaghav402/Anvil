@@ -62,6 +62,15 @@ const envSchema = z
 
     SESSION_HOST_GRACE_MS: z.coerce.number().int().min(1000).max(600_000).default(30_000),
     ENABLE_PAID_TIERS: booleanStringSchema,
+    ADMIN_EMAILS: z
+      .string()
+      .optional()
+      .transform((val) =>
+        (val ?? "")
+          .split(",")
+          .map((s) => s.trim().toLowerCase())
+          .filter(Boolean)
+      ),
 
     YJS_SAVE_DEBOUNCE_MS: z.coerce.number().int().min(250).max(30_000).default(2000),
     PREVIEW_TOKEN_SECRET: z.string().min(16, "PREVIEW_TOKEN_SECRET must be at least 16 characters"),
@@ -154,7 +163,7 @@ if (!parsed.success) {
 
 export const env = parsed.data;
 
-// Ensure Firebase SDKs use emulators ONLY when USE_FIREBASE_EMULATORS=true,
+// Ensure Firebase Admin & Data Connect SDKs use emulators ONLY when USE_FIREBASE_EMULATORS=true,
 // because dotenv loads *_EMULATOR_HOST keys from .env even when disabled.
 if (env.USE_FIREBASE_EMULATORS) {
   process.env.FIREBASE_AUTH_EMULATOR_HOST = env.FIREBASE_AUTH_EMULATOR_HOST;

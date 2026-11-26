@@ -19,6 +19,7 @@ import {
   verifyPreviewToken,
 } from "../src/services/previewTokens.js";
 import { generateOtpCode, storeOtp, verifyOtp } from "../src/services/emailOtpService.js";
+import { resolveUserPlanTier } from "../../appConfig.js";
 
 test("Cross-OS filename validation rejects Windows reserved names and illegal characters", () => {
   for (const bad of [
@@ -148,4 +149,25 @@ test("Email OTP generation, verification, single-use consumption, and attempt lo
     assert.equal(verifyOtp("reset_password", "lock@anvil.local", "111111").valid, false);
   }
   assert.equal(verifyOtp("reset_password", "lock@anvil.local", "654321").valid, false);
+});
+
+test("resolveUserPlanTier enforces server-side ADMIN_EMAILS allowlist when trustAdminTier is false", () => {
+  assert.equal(
+    resolveUserPlanTier(
+      { email: "regular@example.com" },
+      "admin",
+      { adminEmails: ["owner@example.com"], trustAdminTier: false }
+    ),
+    "free"
+  );
+  assert.equal(
+    resolveUserPlanTier(
+      { email: "Owner@Example.com" },
+      "free",
+      { adminEmails: ["owner@example.com"], trustAdminTier: false }
+    ),
+    "admin"
+  );
+  // Client UI trusts authoritative planTier returned from backend /api/auth/me
+  assert.equal(resolveUserPlanTier({ email: "owner@example.com" }, "admin"), "admin");
 });

@@ -8,7 +8,6 @@ import {
   Copy,
   Files,
   GitBranch,
-  LogOut,
   MessageSquare,
   PanelRight,
   Play,
@@ -41,6 +40,7 @@ import { ExplorerSidebar } from "./ExplorerSidebar";
 import { GitSidebar } from "./GitSidebar";
 import { LivePreviewPane } from "./LivePreviewPane";
 import { QuickOpenModal } from "./QuickOpenModal";
+import { UserProfileMenu } from "./UserProfileMenu";
 
 interface WorkspaceProps {
   projectId: string;
@@ -48,6 +48,7 @@ interface WorkspaceProps {
   user: AnvilUser;
   onExitToLobby: (notice?: string) => void;
   onSignOut: () => Promise<void>;
+  onUserUpdated?: (updated: AnvilUser) => void;
 }
 
 type SidebarTab = "explorer" | "git" | "comments" | "collaborators";
@@ -59,6 +60,7 @@ export const Workspace: React.FC<WorkspaceProps> = ({
   user,
   onExitToLobby,
   onSignOut,
+  onUserUpdated,
 }) => {
   const [loading, setLoading] = useState(true);
   const [project, setProject] = useState<AnvilProject | null>(null);
@@ -309,16 +311,20 @@ export const Workspace: React.FC<WorkspaceProps> = ({
     });
   }, [activeNode?.id, activeNode?.relativePath]);
 
-  // Remove deleted files from openTabs
+  // Remove deleted files from openTabs and prune stale problems
   useEffect(() => {
     const validIds = new Set(nodes.map((n) => n.id));
     setOpenTabs((prev) => {
       const filtered = prev.filter((id) => validIds.has(id));
+      setActiveNodeId((curr) => {
+        if (!curr || validIds.has(curr)) return curr;
+        return filtered[filtered.length - 1] ?? null;
+      });
       return filtered.length === prev.length ? prev : filtered;
     });
-    setActiveNodeId((prev) => {
-      if (!prev || validIds.has(prev)) return prev;
-      return null;
+    setProblemsByNode((prev) => {
+      const nextEntries = Object.entries(prev).filter(([id]) => validIds.has(id));
+      return nextEntries.length === Object.keys(prev).length ? prev : Object.fromEntries(nextEntries);
     });
   }, [nodes]);
 
@@ -546,37 +552,30 @@ export const Workspace: React.FC<WorkspaceProps> = ({
             disabled={exportingZip}
             onClick={() => void handleExportZip()}
             title="Export project as .zip"
-            className="bg-[#2d2d2d] hover:bg-[#4a4a4a] border border-[#4a4a4a] text-[#cccccc] px-2 py-0.5 text-[11px] flex items-center gap-1 cursor-pointer"
+            className="bg-[#2d2d2d] hover:bg-[#3c3c3c] border border-[#3c3c3c] hover:border-[#4c4c4c] text-[#cccccc] hover:text-white px-2.5 py-1 rounded-xs text-[11px] flex items-center gap-1.5 transition-all cursor-pointer shadow-xs active:scale-95"
           >
-            <Archive className="w-3 h-3" />
-            {exportingZip ? "Zipping..." : "Export (.zip)"}
+            <Archive className="w-3 h-3 text-[#9cdcfe]" />
+            {exportingZip ? "Zipping..." : "Export"}
           </button>
 
           <button
             type="button"
             onClick={() => setPreviewOpen((p) => !p)}
             title="Toggle Live Preview Pane"
-            className={`px-2 py-0.5 text-[11px] flex items-center gap-1 border cursor-pointer ${
+            className={`px-2.5 py-1 rounded-xs text-[11px] flex items-center gap-1.5 border transition-all cursor-pointer shadow-xs active:scale-95 ${
               previewOpen
-                ? "bg-[#094771] border-[#007acc] text-white"
-                : "bg-[#2d2d2d] border-[#4a4a4a] text-[#cccccc]"
+                ? "bg-[#094771] hover:bg-[#0e5c94] border-[#007acc] text-white"
+                : "bg-[#2d2d2d] hover:bg-[#3c3c3c] border-[#3c3c3c] hover:border-[#4c4c4c] text-[#cccccc] hover:text-white"
             }`}
           >
             <PanelRight className="w-3 h-3" />
             Preview
           </button>
 
-          <span className="text-[11px] text-[#cccccc] font-mono hidden md:inline">
-            {user.username}
-          </span>
-          <button
-            type="button"
-            onClick={() => void onSignOut()}
-            title="Sign Out"
-            className="p-1 hover:bg-[#4c4c4c] text-[#9d9d9d] hover:text-white cursor-pointer"
-          >
-            <LogOut className="w-3.5 h-3.5" />
-          </button>
+          <div className="h-4 w-px bg-[#3c3c3c] mx-1" />
+
+          {/* User Profile Menu */}
+          <UserProfileMenu user={user} onSignOut={onSignOut} onUserUpdated={onUserUpdated} compact />
         </div>
       </header>
 

@@ -1,5 +1,10 @@
 import { initializeApp } from "firebase/app";
-import { connectAuthEmulator, getAuth } from "firebase/auth";
+import {
+  browserLocalPersistence,
+  connectAuthEmulator,
+  getAuth,
+  setPersistence,
+} from "firebase/auth";
 import { connectStorageEmulator, getStorage } from "firebase/storage";
 
 function requireFrontendEnv(name: keyof ImportMetaEnv, value: string | undefined): string {
@@ -33,6 +38,10 @@ const firebaseConfig = {
 
 export const firebaseApp = initializeApp(firebaseConfig);
 export const auth = getAuth(firebaseApp);
+// Ensure login state persists indefinitely in localStorage across browser tabs & restarts
+void setPersistence(auth, browserLocalPersistence).catch((err) => {
+  console.warn("[Anvil] Failed to set browserLocalPersistence:", err);
+});
 export const storage = getStorage(firebaseApp);
 
 if (useEmulators) {
