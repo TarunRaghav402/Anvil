@@ -153,7 +153,7 @@ export const IntroSplash: React.FC<IntroSplashProps> = ({ authReady, onFinish })
     const nextMuted = !muted;
     setMuted(nextMuted);
     if (!nextMuted) {
-      const unlocked = await anvilSound.unlock();
+      const unlocked = await anvilSound.unlock(250);
       if (unlocked) {
         setAudioBlocked(false);
         void anvilSound.playStrike({ intensity: 0.75, baseFreqHz: 698 });
@@ -355,10 +355,10 @@ export const IntroSplash: React.FC<IntroSplashProps> = ({ authReady, onFinish })
           type="button"
           onClick={(e) => void handleToggleSound(e)}
           title={muted ? "Unmute strike sound" : audioBlocked ? "Enable forge sound" : "Mute strike sound"}
-          className={`px-2.5 py-1.5 text-[11px] border flex items-center gap-1.5 transition-colors cursor-pointer ${
+          className={`anvil-btn anvil-btn-sm px-2.5 py-1.5 text-[11px] flex items-center gap-1.5 cursor-pointer ${
             audioBlocked && !muted
-              ? "bg-[#252526] border-[#007acc] text-[#9cdcfe] hover:text-white"
-              : "bg-[#252526] border-[#3c3c3c] text-[#9d9d9d] hover:text-white hover:border-[#555555]"
+              ? "anvil-btn-active text-[#9cdcfe] hover:text-white"
+              : "anvil-btn-secondary text-[#9d9d9d] hover:text-white"
           }`}
         >
           {muted ? <VolumeX className="w-3.5 h-3.5" /> : <Volume2 className="w-3.5 h-3.5" />}
@@ -370,7 +370,7 @@ export const IntroSplash: React.FC<IntroSplashProps> = ({ authReady, onFinish })
         <button
           type="button"
           onClick={handleSkip}
-          className="px-3 py-1.5 text-[11px] bg-[#252526] hover:bg-[#333333] border border-[#3c3c3c] text-[#cccccc] hover:text-white transition-colors cursor-pointer"
+          className="anvil-btn anvil-btn-sm anvil-btn-secondary px-3 py-1.5 text-[11px] text-[#cccccc] hover:text-white cursor-pointer"
         >
           Skip
         </button>

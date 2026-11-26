@@ -103,7 +103,7 @@ export const LivePreviewPane: React.FC<LivePreviewPaneProps> = ({
             type="button"
             title="Refresh Live Preview"
             onClick={() => setManualTick((t) => t + 1)}
-            className="p-1 hover:bg-[#3c3c3c] text-[#cccccc] cursor-pointer"
+            className="anvil-btn anvil-btn-ghost p-1 text-[#cccccc] hover:text-white cursor-pointer"
           >
             <RefreshCw className="w-3.5 h-3.5" />
           </button>
@@ -111,7 +111,7 @@ export const LivePreviewPane: React.FC<LivePreviewPaneProps> = ({
             type="button"
             title="Open Preview in New Tab"
             onClick={() => void handleOpenInNewTab()}
-            className="p-1 hover:bg-[#3c3c3c] text-[#cccccc] cursor-pointer"
+            className="anvil-btn anvil-btn-ghost p-1 text-[#cccccc] hover:text-white cursor-pointer"
           >
             <ExternalLink className="w-3.5 h-3.5" />
           </button>

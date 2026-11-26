@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Laptop, MonitorX, Smartphone } from "lucide-react";
 import { APP_NAME } from "../../../appConfig";
-import { AnvilWordmark } from "./AnvilLogo";
+import { AnvilPolyBackdrop, AnvilWordmark } from "./AnvilLogo";
 
 /**
  * Checks whether the current device is a mobile phone or handheld device.
@@ -74,10 +74,11 @@ export const DesktopOnlyGate: React.FC<DesktopOnlyGateProps> = ({ children }) =>
   if (isMobile) {
     return (
       <div className="fixed inset-0 z-[99999] bg-[#141416] text-[#cccccc] flex flex-col items-center justify-center p-6 select-none font-sans overflow-hidden">
+        <AnvilPolyBackdrop />
         {/* Decorative background glow */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 bg-[#007acc]/10 rounded-full blur-3xl pointer-events-none" />
 
-        <div className="relative w-full max-w-sm bg-[#1e1e1e] border border-[#333333] rounded-lg p-6 shadow-2xl text-center space-y-5">
+        <div className="relative z-10 w-full max-w-sm anvil-poly-frame p-6 shadow-2xl text-center space-y-5">
           {/* Logo */}
           <div className="flex justify-center pb-2">
             <AnvilWordmark size="md" />
@@ -85,9 +86,11 @@ export const DesktopOnlyGate: React.FC<DesktopOnlyGateProps> = ({ children }) =>
 
           {/* Visual icon badge */}
           <div className="flex items-center justify-center">
-            <div className="relative w-20 h-20 rounded-2xl bg-[#252526] border border-[#3c3c3c] flex items-center justify-center shadow-inner">
+            <div className="relative w-20 h-20 anvil-poly-card flex items-center justify-center shadow-inner">
               <Smartphone className="w-9 h-9 text-[#858585]" />
-              <div className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-[#5a1d1d] border-2 border-[#1e1e1e] flex items-center justify-center">
+              <div className="absolute -bottom-1 -right-1 w-7 h-7 anvil-poly-badge flex items-center justify-center"
+                style={{ "--anvil-border": "#be1100", "--anvil-bg": "#5a1d1d" } as React.CSSProperties}
+              >
                 <MonitorX className="w-3.5 h-3.5 text-[#f48771]" />
               </div>
             </div>
@@ -104,7 +107,7 @@ export const DesktopOnlyGate: React.FC<DesktopOnlyGateProps> = ({ children }) =>
           </div>
 
           {/* Desktop site warning box */}
-          <div className="bg-[#252526] border border-[#333333] rounded p-3 text-left space-y-1.5">
+          <div className="anvil-poly-card p-3 text-left space-y-1.5">
             <div className="flex items-center gap-2 text-[11px] font-semibold text-[#f48771]">
               <MonitorX className="w-3.5 h-3.5 shrink-0" />
               <span>Mobile devices unsupported</span>
@@ -115,7 +118,7 @@ export const DesktopOnlyGate: React.FC<DesktopOnlyGateProps> = ({ children }) =>
           </div>
 
           {/* Action guidance */}
-          <div className="pt-2 border-t border-[#2a2a2a] flex items-center justify-center gap-2 text-[11px] text-[#858585]">
+          <div className="pt-2 border-t border-[#333333] flex items-center justify-center gap-2 text-[11px] text-[#858585]">
             <Laptop className="w-4 h-4 text-[#007acc]" />
             <span>Please open on macOS, Windows, or Linux.</span>
           </div>

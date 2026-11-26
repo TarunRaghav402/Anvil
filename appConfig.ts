@@ -14,11 +14,17 @@ export const ROLE_LABELS: Record<ProjectRole, string> = {
 };
 
 /**
- * Intentionally empty in source control so personal email addresses are never
- * exposed in the public repository or compiled client bundle.
- * Server-side admins are configured via the backend `ADMIN_EMAILS` env variable.
+ * The 4 Designated Permanent Admin Emails.
+ * Users signing in with these exact 4 email addresses ALWAYS receive "admin"
+ * regardless of stored planTier or subscription calls. All other accounts
+ * start as "free" and upgrade to "pro" when subscribed.
  */
-export const ADMIN_EMAILS: string[] = [];
+export const ADMIN_EMAILS: readonly string[] = [
+  "tarunraghav.in@gmail.com",
+  "sarveshwaran.k2008@gmail.com",
+  "sriram1080xp@gmail.com",
+  "tilaksrinivas270208@gmail.com",
+];
 
 export type PlanTier = "admin" | "pro" | "free";
 
@@ -34,11 +40,15 @@ export function resolveUserPlanTier(
 ): PlanTier {
   const cleanTier = rawTier?.trim().toLowerCase();
   const emailLower = identifier?.email?.trim().toLowerCase();
-  const adminList = options?.adminEmails ?? ADMIN_EMAILS;
+
+  // Designated admins always stay admin in every case
+  const effectiveAdmins = options?.adminEmails
+    ? [...ADMIN_EMAILS, ...options.adminEmails]
+    : ADMIN_EMAILS;
 
   if (
     emailLower &&
-    adminList.some((adminEmail) => adminEmail.trim().toLowerCase() === emailLower)
+    effectiveAdmins.some((adminEmail) => adminEmail.trim().toLowerCase() === emailLower)
   ) {
     return "admin";
   }

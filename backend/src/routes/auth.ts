@@ -11,7 +11,46 @@ import {
   verifyOtp,
 } from "../services/emailOtpService.js";
 import { normalizeNodeName } from "../utils/filenames.js";
-import { resolveUserPlanTier } from "../../../appConfig.js";
+import { ADMIN_EMAILS, resolveUserPlanTier, type PlanTier } from "../../../appConfig.js";
+
+const EFFECTIVE_ADMIN_EMAILS = [...ADMIN_EMAILS, ...env.ADMIN_EMAILS];
+
+function resolveServerPlanTier(
+  identifier: { username?: string | null; email?: string | null },
+  rawTier?: string | null
+): PlanTier {
+  return resolveUserPlanTier(
+    {
+      username: identifier.username ?? undefined,
+      email: identifier.email ?? undefined,
+    },
+    rawTier,
+    {
+      adminEmails: EFFECTIVE_ADMIN_EMAILS,
+      trustAdminTier: false,
+    }
+  );
+}
+
+async function syncFirebasePlanClaim(uid: string, planTier: PlanTier): Promise<string> {
+  let role = "Developer";
+  try {
+    const fbUser = await adminAuth.getUser(uid);
+    const currentClaims = fbUser.customClaims || {};
+    if (currentClaims.role) {
+      role = String(currentClaims.role);
+    }
+    if (currentClaims.planTier !== planTier) {
+      await adminAuth.setCustomUserClaims(uid, {
+        ...currentClaims,
+        planTier,
+      });
+    }
+  } catch (err) {
+    console.warn("[Anvil Auth] Failed to sync planTier claim in Firebase:", err);
+  }
+  return role;
+}
 
 export const authRouter = Router();
 
@@ -128,10 +167,7 @@ authRouter.post("/register", authLimiter, verifyFirebaseToken, async (req, res, 
       return;
     }
 
-    const planTier = resolveUserPlanTier({ username: parsed.data.username, email }, "free", {
-      adminEmails: env.ADMIN_EMAILS,
-      trustAdminTier: false,
-    });
+    const planTier = resolveServerPlanTier({ username: parsed.data.username, email }, "free");
 
     try {
       await db.createUser({
@@ -147,6 +183,8 @@ authRouter.post("/register", authLimiter, verifyFirebaseToken, async (req, res, 
       }
       throw err;
     }
+
+    await syncFirebasePlanClaim(uid, planTier);
 
     try {
       await adminAuth.updateUser(uid, { displayName: parsed.data.username });
@@ -349,25 +387,28 @@ authRouter.get("/me", verifyFirebaseToken, async (req, res, next) => {
     const { uid, email, emailVerified } = req.auth!;
     let user = await db.getUserById(uid);
     let role = "Developer";
-    try {
-      const fbUser = await adminAuth.getUser(uid);
-      if (fbUser.customClaims?.role) {
-        role = String(fbUser.customClaims.role);
-      }
-    } catch {
-      // Fallback
-    }
 
     if (user) {
-      const resolvedTier = resolveUserPlanTier(
-        { username: user.username, email: user.email },
-        user.planTier,
-        { adminEmails: env.ADMIN_EMAILS, trustAdminTier: false }
+      const resolvedTier = resolveServerPlanTier(
+        { username: user.username, email: user.email || email },
+        user.planTier
       );
       if (user.planTier !== resolvedTier) {
+        // Persist permanent admin / corrected tier into Firebase Data Connect SQL database
+        await db.updateUser(uid, { planTier: resolvedTier });
         user = { ...user, planTier: resolvedTier };
       }
+      role = await syncFirebasePlanClaim(uid, resolvedTier);
       user = { ...user, role } as any;
+    } else {
+      try {
+        const fbUser = await adminAuth.getUser(uid);
+        if (fbUser.customClaims?.role) {
+          role = String(fbUser.customClaims.role);
+        }
+      } catch {
+        // Fallback
+      }
     }
     res.json({
       uid,
@@ -444,11 +485,15 @@ authRouter.patch(
       }
 
       const updatedUser = await db.getUserById(uid);
-      const resolvedTier = resolveUserPlanTier(
+      const resolvedTier = resolveServerPlanTier(
         { username: updatedUser?.username, email: updatedUser?.email },
-        updatedUser?.planTier,
-        { adminEmails: env.ADMIN_EMAILS, trustAdminTier: false }
+        updatedUser?.planTier
       );
+      if (updatedUser && updatedUser.planTier !== resolvedTier) {
+        await db.updateUser(uid, { planTier: resolvedTier });
+        updatedUser.planTier = resolvedTier;
+      }
+      await syncFirebasePlanClaim(uid, resolvedTier);
 
       res.json({
         user: updatedUser ? { ...updatedUser, planTier: resolvedTier, role: assignedRole } : null,
@@ -460,7 +505,7 @@ authRouter.patch(
   }
 );
 
-// Upgrade / Manage Subscription Plan (gated by ENABLE_PAID_TIERS feature flag)
+// Subscribe to Pro or switch to Free (designated admins stay permanently "admin" in Firebase DB + Auth)
 authRouter.post(
   "/subscribe",
   authLimiter,
@@ -477,53 +522,37 @@ authRouter.post(
         return;
       }
 
-      if (parsed.data.planTier === "pro" && !env.ENABLE_PAID_TIERS) {
-        res.status(403).json({
-          error:
-            "Paid plans are currently disabled (ENABLE_PAID_TIERS=false). Billing integration is required before self-service upgrades are allowed.",
-        });
-        return;
-      }
-
-      const { uid } = req.auth!;
+      const { uid, email } = req.auth!;
       const user = await db.getUserById(uid);
       if (!user) {
         res.status(404).json({ error: "User not found." });
         return;
       }
 
-      // Admins always keep their master status
+      // Designated admin emails never lose admin tier in any case
       const isMasterAdmin =
-        resolveUserPlanTier({ username: user.username, email: user.email }, user.planTier, {
-          adminEmails: env.ADMIN_EMAILS,
-          trustAdminTier: false,
-        }) === "admin";
-      const targetTier = isMasterAdmin ? "admin" : parsed.data.planTier;
+        resolveServerPlanTier({ username: user.username, email: user.email || email }, "free") ===
+        "admin";
+      const targetTier: PlanTier = isMasterAdmin ? "admin" : parsed.data.planTier;
 
+      // Persist plan tier into Firebase Data Connect PostgreSQL database + Firebase Auth custom claims
       await db.updateUser(uid, { planTier: targetTier });
-
-      // Also update custom claims in Firebase Auth for real-time verification
-      try {
-        const fbUser = await adminAuth.getUser(uid);
-        const currentClaims = fbUser.customClaims || {};
-        await adminAuth.setCustomUserClaims(uid, {
-          ...currentClaims,
-          planTier: targetTier,
-        });
-      } catch (err) {
-        console.warn("[Anvil Auth] Failed to set planTier claim in Firebase:", err);
-      }
+      const role = await syncFirebasePlanClaim(uid, targetTier);
 
       const updated = await db.getUserById(uid);
-      const resolvedTier = resolveUserPlanTier(
-        { username: updated?.username, email: updated?.email },
-        updated?.planTier,
-        { adminEmails: env.ADMIN_EMAILS, trustAdminTier: false }
+      const resolvedTier = resolveServerPlanTier(
+        { username: updated?.username, email: updated?.email || email },
+        updated?.planTier
       );
 
       res.json({
-        user: updated ? { ...updated, planTier: resolvedTier } : null,
-        message: targetTier === "pro" ? "Upgraded to Anvil Pro successfully!" : "Plan changed to Free.",
+        user: updated ? { ...updated, planTier: resolvedTier, role } : null,
+        message:
+          targetTier === "admin"
+            ? "Designated Master Admin status is permanently active."
+            : targetTier === "pro"
+            ? "Subscribed to Anvil Pro successfully!"
+            : "Plan changed to Free.",
       });
     } catch (err) {
       next(err);

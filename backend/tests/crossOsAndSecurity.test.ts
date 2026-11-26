@@ -151,23 +151,31 @@ test("Email OTP generation, verification, single-use consumption, and attempt lo
   assert.equal(verifyOtp("reset_password", "lock@anvil.local", "654321").valid, false);
 });
 
-test("resolveUserPlanTier enforces server-side ADMIN_EMAILS allowlist when trustAdminTier is false", () => {
+test("resolveUserPlanTier permanently locks the 4 designated admin emails and manages free/pro tiers", () => {
+  // Designated admins remain "admin" regardless of stored DB tier
+  for (const adminEmail of [
+    "tarunraghav.in@gmail.com",
+    "sarveshwaran.k2008@gmail.com",
+    "sriram1080xp@gmail.com",
+    "tilaksrinivas270208@gmail.com",
+  ]) {
+    assert.equal(resolveUserPlanTier({ email: adminEmail.toUpperCase() }, "free", { trustAdminTier: false }), "admin");
+    assert.equal(resolveUserPlanTier({ email: adminEmail }, "pro", { trustAdminTier: false }), "admin");
+  }
+
+  // Non-admins default to free and cannot spoof "admin" server-side
   assert.equal(
-    resolveUserPlanTier(
-      { email: "regular@example.com" },
-      "admin",
-      { adminEmails: ["owner@example.com"], trustAdminTier: false }
-    ),
+    resolveUserPlanTier({ email: "regular@example.com" }, "free", { trustAdminTier: false }),
     "free"
   );
   assert.equal(
-    resolveUserPlanTier(
-      { email: "Owner@Example.com" },
-      "free",
-      { adminEmails: ["owner@example.com"], trustAdminTier: false }
-    ),
-    "admin"
+    resolveUserPlanTier({ email: "regular@example.com" }, "admin", { trustAdminTier: false }),
+    "free"
   );
-  // Client UI trusts authoritative planTier returned from backend /api/auth/me
-  assert.equal(resolveUserPlanTier({ email: "owner@example.com" }, "admin"), "admin");
+
+  // Subscribed general users receive "pro"
+  assert.equal(
+    resolveUserPlanTier({ email: "regular@example.com" }, "pro", { trustAdminTier: false }),
+    "pro"
+  );
 });

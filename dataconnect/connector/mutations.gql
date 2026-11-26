@@ -18,6 +18,22 @@ mutation CreateUser(
   )
 }
 
+mutation UpdateUser(
+  $id: String!
+  $username: String
+  $usernameLower: String
+  $planTier: String
+) @auth(level: NO_ACCESS) {
+  user_update(
+    id: $id
+    data: {
+      username: $username
+      usernameLower: $usernameLower
+      planTier: $planTier
+    }
+  )
+}
+
 mutation CreateProject(
   $id: UUID!
   $ownerId: String!

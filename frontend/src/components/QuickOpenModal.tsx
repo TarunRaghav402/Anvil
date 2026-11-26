@@ -53,7 +53,8 @@ export const QuickOpenModal: React.FC<QuickOpenModalProps> = ({
       onClick={onClose}
     >
       <div
-        className="w-full max-w-xl bg-[#252526] border border-[#3c3c3c] shadow-2xl"
+        className="w-full max-w-xl anvil-poly-frame shadow-2xl"
+        style={{ "--anvil-c": "8px" } as React.CSSProperties}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center gap-2 px-3 py-2 border-b border-[#3c3c3c] bg-[#3c3c3c]/40">

@@ -2,7 +2,7 @@ import { adminAuth } from "../config/firebase.js";
 import { env } from "../config/env.js";
 import { db, newUuid } from "../services/db.js";
 import { downloadAssetBuffer, uploadAssetBuffer } from "../services/storageService.js";
-import { APP_NAME } from "../../../appConfig.js";
+import { APP_NAME, resolveUserPlanTier } from "../../../appConfig.js";
 
 if (!env.USE_FIREBASE_EMULATORS) {
   console.error(`[${APP_NAME}] Seed script is intended for local Firebase Emulator testing only.`);
@@ -48,7 +48,7 @@ async function ensureUser(username: string, email: string, password: string): Pr
       id: uid,
       username,
       email,
-      planTier: "free",
+      planTier: resolveUserPlanTier({ username, email }, "free", { trustAdminTier: false }),
     });
   }
 

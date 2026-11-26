@@ -145,7 +145,7 @@ export const GitSidebar: React.FC<GitSidebarProps> = ({
         <button
           type="submit"
           disabled={busy || !originUrl.trim() || !pat.trim() || !commitMessage.trim()}
-          className="w-full bg-[#007acc] hover:bg-[#1f8ad2] disabled:opacity-50 text-white py-2 px-3 text-[12px] font-medium flex items-center justify-center gap-2 cursor-pointer"
+          className="w-full anvil-btn anvil-btn-primary disabled:opacity-50 text-white py-2 px-3 text-[12px] font-medium flex items-center justify-center gap-2 cursor-pointer"
         >
           <UploadCloud className="w-4 h-4" />
           {busy ? "Pushing to GitHub..." : "Commit & Push"}

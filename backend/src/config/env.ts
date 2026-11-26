@@ -163,8 +163,9 @@ if (!parsed.success) {
 
 export const env = parsed.data;
 
-// Ensure Firebase Admin & Data Connect SDKs use emulators ONLY when USE_FIREBASE_EMULATORS=true,
-// because dotenv loads *_EMULATOR_HOST keys from .env even when disabled.
+// Ensure Auth & Storage Admin SDKs use emulators only when USE_FIREBASE_EMULATORS=true,
+// while allowing local Data Connect emulator usage in non-production hybrid setups
+// (Cloud Auth/Storage + local Data Connect emulator on DATA_CONNECT_EMULATOR_HOST).
 if (env.USE_FIREBASE_EMULATORS) {
   process.env.FIREBASE_AUTH_EMULATOR_HOST = env.FIREBASE_AUTH_EMULATOR_HOST;
   process.env.FIREBASE_STORAGE_EMULATOR_HOST = env.FIREBASE_STORAGE_EMULATOR_HOST;
@@ -172,7 +173,11 @@ if (env.USE_FIREBASE_EMULATORS) {
 } else {
   delete process.env.FIREBASE_AUTH_EMULATOR_HOST;
   delete process.env.FIREBASE_STORAGE_EMULATOR_HOST;
-  delete process.env.DATA_CONNECT_EMULATOR_HOST;
+  if (env.NODE_ENV !== "production" && env.DATA_CONNECT_EMULATOR_HOST?.trim()) {
+    process.env.DATA_CONNECT_EMULATOR_HOST = env.DATA_CONNECT_EMULATOR_HOST.trim();
+  } else {
+    delete process.env.DATA_CONNECT_EMULATOR_HOST;
+  }
 }
 
 if (!env.GOOGLE_APPLICATION_CREDENTIALS) {

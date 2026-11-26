@@ -93,17 +93,20 @@ export const CollaboratorsSidebar: React.FC<CollaboratorsSidebarProps> = ({
         </section>
 
         {/* Session Lifecycle */}
-        <section className="border border-[#3c3c3c] bg-[#1e1e1e] p-3 space-y-2.5">
+        <section className="anvil-poly-card p-3 space-y-2.5" style={{ "--anvil-c": "6px" } as React.CSSProperties}>
           <div className="flex items-center justify-between">
             <span className="text-[11px] uppercase tracking-wider text-[#9d9d9d]">
               Live Session
             </span>
             {activeSession?.status === "active" ? (
-              <span className="text-[10px] px-1.5 py-0.5 bg-[#1b3a2b] border border-[#2ea043] text-[#89d185]">
+              <span
+                className="anvil-poly-badge text-[10px] px-2 py-0.5 text-[#89d185]"
+                style={{ "--anvil-border": "#2ea043", "--anvil-bg": "#1b3a2b" } as React.CSSProperties}
+              >
                 ACTIVE
               </span>
             ) : (
-              <span className="text-[10px] px-1.5 py-0.5 bg-[#333333] text-[#858585]">
+              <span className="anvil-poly-badge text-[10px] px-2 py-0.5 text-[#858585]">
                 SOLO
               </span>
             )}
@@ -118,7 +121,7 @@ export const CollaboratorsSidebar: React.FC<CollaboratorsSidebarProps> = ({
                 <button
                   type="button"
                   onClick={() => void copyText("code", activeSession.sessionCode)}
-                  className="text-[11px] text-[#9cdcfe] hover:text-white flex items-center gap-1 cursor-pointer"
+                  className="anvil-btn anvil-btn-ghost text-[11px] text-[#9cdcfe] hover:text-white px-1.5 py-0.5 flex items-center gap-1 cursor-pointer"
                 >
                   {copiedKey === "code" ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
                   {copiedKey === "code" ? "Copied" : "Code"}
@@ -128,7 +131,7 @@ export const CollaboratorsSidebar: React.FC<CollaboratorsSidebarProps> = ({
               <button
                 type="button"
                 onClick={() => void copyText("url", inviteUrl)}
-                className="w-full bg-[#3c3c3c] hover:bg-[#4c4c4c] text-[#cccccc] py-1.5 px-2.5 text-[11px] flex items-center justify-center gap-1.5 cursor-pointer"
+                className="w-full anvil-btn anvil-btn-sm anvil-btn-secondary text-[#cccccc] hover:text-white py-1.5 px-2.5 text-[11px] flex items-center justify-center gap-1.5 cursor-pointer"
               >
                 {copiedKey === "url" ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
                 {copiedKey === "url" ? "Invite Link Copied" : "Copy Shareable Invite URL"}
@@ -138,7 +141,7 @@ export const CollaboratorsSidebar: React.FC<CollaboratorsSidebarProps> = ({
                 <button
                   type="button"
                   onClick={() => void onEndSession()}
-                  className="w-full bg-[#5a1d1d] hover:bg-[#732626] border border-[#be1100] text-[#f48771] py-1.5 px-2.5 text-[12px] flex items-center justify-center gap-1.5 cursor-pointer"
+                  className="w-full anvil-btn anvil-btn-sm anvil-btn-danger text-[#f48771] hover:text-white py-1.5 px-2.5 text-[12px] flex items-center justify-center gap-1.5 cursor-pointer"
                 >
                   <Square className="w-3.5 h-3.5" />
                   End Session
@@ -149,7 +152,7 @@ export const CollaboratorsSidebar: React.FC<CollaboratorsSidebarProps> = ({
             <button
               type="button"
               onClick={() => void onStartSession()}
-              className="w-full bg-[#007acc] hover:bg-[#1f8ad2] text-white py-1.5 px-3 text-[12px] font-medium flex items-center justify-center gap-1.5 cursor-pointer"
+              className="w-full anvil-btn anvil-btn-sm anvil-btn-primary text-white py-1.5 px-3 text-[12px] font-medium flex items-center justify-center gap-1.5 cursor-pointer"
             >
               <Play className="w-3.5 h-3.5" />
               Start Session
@@ -215,7 +218,7 @@ export const CollaboratorsSidebar: React.FC<CollaboratorsSidebarProps> = ({
                   type="submit"
                   disabled={memberBusy || !identifier.trim()}
                   title="Add Permanent Member"
-                  className="bg-[#007acc] hover:bg-[#1f8ad2] disabled:opacity-50 text-white px-2 py-1 cursor-pointer"
+                  className="anvil-btn anvil-btn-sm anvil-btn-primary disabled:opacity-50 text-white px-2.5 py-1 cursor-pointer"
                 >
                   <UserPlus className="w-3.5 h-3.5" />
                 </button>

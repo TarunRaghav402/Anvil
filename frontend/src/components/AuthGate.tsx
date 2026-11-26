@@ -12,7 +12,7 @@ import { AlertCircle, ArrowLeft, CheckCircle2, KeyRound, LogOut, MailCheck, Refr
 import { APP_NAME, APP_TAGLINE } from "../../../appConfig";
 import { auth, IS_EMULATOR_MODE } from "../config/firebase";
 import { api } from "../services/api";
-import { AnvilWordmark } from "./AnvilLogo";
+import { AnvilPolyBackdrop, AnvilWordmark } from "./AnvilLogo";
 
 interface AuthGateProps {
   firebaseUser: User | null;
@@ -292,8 +292,9 @@ export const AuthGate: React.FC<AuthGateProps> = ({ firebaseUser, onVerified }) 
   // Verification gate if user is authenticated in Firebase but unverified
   if (firebaseUser && !firebaseUser.emailVerified) {
     return (
-      <div className="h-screen w-screen bg-[#1e1e1e] text-[#cccccc] flex items-center justify-center p-4">
-        <div className="w-full max-w-md bg-[#252526] border border-[#3c3c3c] p-6">
+      <div className="relative h-screen w-screen bg-[#1e1e1e] text-[#cccccc] flex items-center justify-center p-4 overflow-hidden">
+        <AnvilPolyBackdrop />
+        <div className="relative z-10 w-full max-w-md anvil-poly-frame shadow-2xl p-6">
           <div className="flex items-center justify-between border-b border-[#3c3c3c] pb-4 mb-5">
             <AnvilWordmark size="md" />
             <span className="text-[11px] uppercase tracking-wider text-[#858585]">
@@ -315,7 +316,7 @@ export const AuthGate: React.FC<AuthGateProps> = ({ firebaseUser, onVerified }) 
           </div>
 
           {verifyDelivery === "emulator" && (
-            <div className="bg-[#1e1e1e] border border-[#3c3c3c] p-3 mb-4 text-[11px] text-[#9cdcfe] space-y-1">
+            <div className="anvil-poly-card p-3 mb-4 text-[11px] text-[#9cdcfe] space-y-1">
               <div>
                 <strong>Local Dev Mode</strong> (SMTP not configured in <code>.env</code>):
                 {emulatorVerifyCode ? (
@@ -334,14 +335,14 @@ export const AuthGate: React.FC<AuthGateProps> = ({ firebaseUser, onVerified }) 
           )}
 
           {error && (
-            <div className="flex items-start gap-2 bg-[#5a1d1d] border border-[#be1100] text-[#f48771] px-3 py-2 mb-4 text-[12px]">
+            <div className="flex items-start gap-2 anvil-poly-card anvil-poly-card-danger text-[#f48771] px-3 py-2 mb-4 text-[12px]">
               <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
               <span>{error}</span>
             </div>
           )}
 
           {info && (
-            <div className="bg-[#1b3a2b] border border-[#2ea043] text-[#89d185] px-3 py-2 mb-4 text-[12px]">
+            <div className="anvil-poly-card anvil-poly-card-success text-[#89d185] px-3 py-2 mb-4 text-[12px]">
               {info}
             </div>
           )}
@@ -366,7 +367,7 @@ export const AuthGate: React.FC<AuthGateProps> = ({ firebaseUser, onVerified }) 
             <button
               type="submit"
               disabled={busy || verifyCode.trim().length !== 6}
-              className="w-full bg-[#007acc] hover:bg-[#1f8ad2] disabled:opacity-50 text-white py-2 px-3 text-[13px] font-medium flex items-center justify-center gap-2 cursor-pointer"
+              className="w-full anvil-btn anvil-btn-primary disabled:opacity-50 text-white py-2 px-3 text-[13px] font-medium flex items-center justify-center gap-2 cursor-pointer"
             >
               <CheckCircle2 className="w-4 h-4" />
               Verify Email
@@ -379,7 +380,7 @@ export const AuthGate: React.FC<AuthGateProps> = ({ firebaseUser, onVerified }) 
                 type="button"
                 disabled={busy}
                 onClick={() => void handleQuickVerify()}
-                className="w-full bg-[#2ea043] hover:bg-[#3fb950] disabled:opacity-50 text-white py-2 px-3 text-[13px] font-medium cursor-pointer"
+                className="w-full anvil-btn anvil-btn-success disabled:opacity-50 text-white py-2 px-3 text-[13px] font-medium cursor-pointer"
               >
                 Verify Now (Quick Verify)
               </button>
@@ -400,7 +401,7 @@ export const AuthGate: React.FC<AuthGateProps> = ({ firebaseUser, onVerified }) 
                   .catch((err) => setError(formatFirebaseAuthError(err)))
                   .finally(() => setBusy(false));
               }}
-              className="w-full bg-[#2a2d2e] hover:bg-[#3c3c3c] border border-[#3c3c3c] disabled:opacity-50 text-white py-2 px-3 text-[13px] flex items-center justify-center gap-2 cursor-pointer"
+              className="w-full anvil-btn anvil-btn-secondary disabled:opacity-50 text-white py-2 px-3 text-[13px] flex items-center justify-center gap-2 cursor-pointer"
             >
               <CheckCircle2 className="w-3.5 h-3.5 text-[#4ec9b0]" />
               I Verified My Email — Continue
@@ -410,7 +411,7 @@ export const AuthGate: React.FC<AuthGateProps> = ({ firebaseUser, onVerified }) 
               type="button"
               disabled={busy}
               onClick={() => void requestVerificationCode()}
-              className="w-full bg-[#3c3c3c] hover:bg-[#4c4c4c] disabled:opacity-50 text-[#cccccc] py-2 px-3 text-[13px] flex items-center justify-center gap-2 cursor-pointer"
+              className="w-full anvil-btn anvil-btn-secondary disabled:opacity-50 text-[#cccccc] py-2 px-3 text-[13px] flex items-center justify-center gap-2 cursor-pointer"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${busy ? "animate-spin" : ""}`} />
               Resend Verification Code
@@ -419,7 +420,7 @@ export const AuthGate: React.FC<AuthGateProps> = ({ firebaseUser, onVerified }) 
             <button
               type="button"
               onClick={() => void handleSignOut()}
-              className="w-full bg-transparent hover:bg-[#2a2d2e] border border-[#3c3c3c] text-[#9d9d9d] py-2 px-3 text-[12px] flex items-center justify-center gap-2 mt-1 cursor-pointer"
+              className="w-full anvil-btn anvil-btn-ghost text-[#9d9d9d] hover:text-white py-2 px-3 text-[12px] flex items-center justify-center gap-2 mt-1 cursor-pointer"
             >
               <LogOut className="w-3.5 h-3.5" />
               Sign Out / Switch Account
@@ -431,16 +432,17 @@ export const AuthGate: React.FC<AuthGateProps> = ({ firebaseUser, onVerified }) 
   }
 
   return (
-    <div className="h-screen w-screen bg-[#1e1e1e] text-[#cccccc] flex items-center justify-center p-4">
-      <div className="w-full max-w-md bg-[#252526] border border-[#3c3c3c]">
-        <div className="bg-[#333333] border-b border-[#3c3c3c] px-5 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <AnvilWordmark size="md" />
-            <span className="text-[11px] text-[#858585] border-l border-[#3c3c3c] pl-3">
+    <div className="relative h-screen w-screen bg-[#1e1e1e] text-[#cccccc] flex items-center justify-center p-4 overflow-hidden">
+      <AnvilPolyBackdrop />
+      <div className="relative z-10 w-full max-w-md anvil-poly-frame shadow-2xl">
+        <div className="bg-[#2c2d30]/90 border-b border-[#3c3c3c] px-4 py-3 flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <AnvilWordmark size="sm" />
+            <span className="text-[11px] text-[#9d9d9d] border-l border-[#3c3c3c] pl-2.5 truncate">
               {APP_TAGLINE}
             </span>
           </div>
-          <span className="text-[11px] text-[#858585] font-mono">Dark+</span>
+          <span className="text-[11px] text-[#858585] font-mono shrink-0">Dark+</span>
         </div>
 
         {view !== "forgot" ? (
@@ -452,10 +454,10 @@ export const AuthGate: React.FC<AuthGateProps> = ({ firebaseUser, onVerified }) 
                 setError(null);
                 setInfo(null);
               }}
-              className={`flex-1 py-2.5 text-[12px] font-medium uppercase tracking-wider cursor-pointer ${
+              className={`flex-1 py-2.5 text-[12px] font-medium uppercase tracking-wider cursor-pointer transition-colors ${
                 view === "login"
                   ? "bg-[#1e1e1e] text-white border-t-2 border-t-[#007acc]"
-                  : "bg-[#2d2d2d] text-[#858585] hover:text-[#cccccc]"
+                  : "bg-[#2a2b2e] text-[#858585] hover:text-[#cccccc]"
               }`}
             >
               Sign In
@@ -467,10 +469,10 @@ export const AuthGate: React.FC<AuthGateProps> = ({ firebaseUser, onVerified }) 
                 setError(null);
                 setInfo(null);
               }}
-              className={`flex-1 py-2.5 text-[12px] font-medium uppercase tracking-wider cursor-pointer ${
+              className={`flex-1 py-2.5 text-[12px] font-medium uppercase tracking-wider cursor-pointer transition-colors ${
                 view === "register"
                   ? "bg-[#1e1e1e] text-white border-t-2 border-t-[#007acc]"
-                  : "bg-[#2d2d2d] text-[#858585] hover:text-[#cccccc]"
+                  : "bg-[#2a2b2e] text-[#858585] hover:text-[#cccccc]"
               }`}
             >
               Create Account
@@ -501,14 +503,14 @@ export const AuthGate: React.FC<AuthGateProps> = ({ firebaseUser, onVerified }) 
         {view === "login" && (
           <form onSubmit={handleLogin} className="p-6 space-y-4">
             {error && (
-              <div className="flex items-start gap-2 bg-[#5a1d1d] border border-[#be1100] text-[#f48771] px-3 py-2 text-[12px]">
+              <div className="flex items-start gap-2 anvil-poly-card anvil-poly-card-danger text-[#f48771] px-3 py-2 text-[12px]">
                 <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
                 <span>{error}</span>
               </div>
             )}
 
             {info && (
-              <div className="bg-[#1b3a2b] border border-[#2ea043] text-[#89d185] px-3 py-2 text-[12px]">
+              <div className="anvil-poly-card anvil-poly-card-success text-[#89d185] px-3 py-2 text-[12px]">
                 {info}
               </div>
             )}
@@ -561,7 +563,7 @@ export const AuthGate: React.FC<AuthGateProps> = ({ firebaseUser, onVerified }) 
             <button
               type="submit"
               disabled={busy}
-              className="w-full bg-[#007acc] hover:bg-[#1f8ad2] disabled:opacity-50 text-white py-2 px-4 text-[13px] font-medium cursor-pointer"
+              className="w-full anvil-btn anvil-btn-primary disabled:opacity-50 text-white py-2.5 px-4 text-[13px] font-medium cursor-pointer"
             >
               {busy ? "Signing In..." : `Sign In to ${APP_NAME}`}
             </button>
@@ -571,14 +573,14 @@ export const AuthGate: React.FC<AuthGateProps> = ({ firebaseUser, onVerified }) 
         {view === "register" && (
           <form onSubmit={handleRegister} className="p-6 space-y-4">
             {error && (
-              <div className="flex items-start gap-2 bg-[#5a1d1d] border border-[#be1100] text-[#f48771] px-3 py-2 text-[12px]">
+              <div className="flex items-start gap-2 anvil-poly-card anvil-poly-card-danger text-[#f48771] px-3 py-2 text-[12px]">
                 <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
                 <span>{error}</span>
               </div>
             )}
 
             {info && (
-              <div className="bg-[#1b3a2b] border border-[#2ea043] text-[#89d185] px-3 py-2 text-[12px]">
+              <div className="anvil-poly-card anvil-poly-card-success text-[#89d185] px-3 py-2 text-[12px]">
                 {info}
               </div>
             )}
@@ -632,7 +634,7 @@ export const AuthGate: React.FC<AuthGateProps> = ({ firebaseUser, onVerified }) 
             <button
               type="submit"
               disabled={busy}
-              className="w-full bg-[#007acc] hover:bg-[#1f8ad2] disabled:opacity-50 text-white py-2 px-4 text-[13px] font-medium cursor-pointer"
+              className="w-full anvil-btn anvil-btn-primary disabled:opacity-50 text-white py-2.5 px-4 text-[13px] font-medium cursor-pointer"
             >
               {busy ? "Creating Account..." : `Register for ${APP_NAME}`}
             </button>
@@ -642,7 +644,7 @@ export const AuthGate: React.FC<AuthGateProps> = ({ firebaseUser, onVerified }) 
         {view === "forgot" && forgotStep === "request" && (
           <form onSubmit={handleForgotSendCode} className="p-6 space-y-4">
             {error && (
-              <div className="flex items-start gap-2 bg-[#5a1d1d] border border-[#be1100] text-[#f48771] px-3 py-2 text-[12px]">
+              <div className="flex items-start gap-2 anvil-poly-card anvil-poly-card-danger text-[#f48771] px-3 py-2 text-[12px]">
                 <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
                 <span>{error}</span>
               </div>
@@ -670,7 +672,7 @@ export const AuthGate: React.FC<AuthGateProps> = ({ firebaseUser, onVerified }) 
             <button
               type="submit"
               disabled={busy}
-              className="w-full bg-[#007acc] hover:bg-[#1f8ad2] disabled:opacity-50 text-white py-2 px-4 text-[13px] font-medium cursor-pointer"
+              className="w-full anvil-btn anvil-btn-primary disabled:opacity-50 text-white py-2.5 px-4 text-[13px] font-medium cursor-pointer"
             >
               {busy ? "Sending Code..." : "Send Reset Code"}
             </button>
@@ -680,20 +682,20 @@ export const AuthGate: React.FC<AuthGateProps> = ({ firebaseUser, onVerified }) 
         {view === "forgot" && forgotStep === "reset" && (
           <form onSubmit={handleForgotResetPassword} className="p-6 space-y-4">
             {error && (
-              <div className="flex items-start gap-2 bg-[#5a1d1d] border border-[#be1100] text-[#f48771] px-3 py-2 text-[12px]">
+              <div className="flex items-start gap-2 anvil-poly-card anvil-poly-card-danger text-[#f48771] px-3 py-2 text-[12px]">
                 <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
                 <span>{error}</span>
               </div>
             )}
 
             {info && (
-              <div className="bg-[#1b3a2b] border border-[#2ea043] text-[#89d185] px-3 py-2 text-[12px]">
+              <div className="anvil-poly-card anvil-poly-card-success text-[#89d185] px-3 py-2 text-[12px]">
                 {info}
               </div>
             )}
 
             {IS_EMULATOR_MODE && emulatorResetCode && (
-              <div className="bg-[#1e1e1e] border border-[#3c3c3c] p-3 text-[11px] text-[#9cdcfe]">
+              <div className="anvil-poly-card p-3 text-[11px] text-[#9cdcfe]">
                 Emulator Mode reset code:{" "}
                 <span className="font-mono font-bold text-white">{emulatorResetCode}</span>
               </div>
@@ -752,14 +754,14 @@ export const AuthGate: React.FC<AuthGateProps> = ({ firebaseUser, onVerified }) 
                 type="button"
                 disabled={busy}
                 onClick={() => void handleForgotSendCode({ preventDefault: () => {} } as React.FormEvent)}
-                className="bg-[#3c3c3c] hover:bg-[#4c4c4c] text-[#cccccc] px-3 py-2 text-[12px] cursor-pointer"
+                className="anvil-btn anvil-btn-secondary text-[#cccccc] hover:text-white px-3.5 py-2 text-[12px] cursor-pointer"
               >
                 Resend
               </button>
               <button
                 type="submit"
                 disabled={busy || resetCode.trim().length !== 6}
-                className="flex-1 bg-[#007acc] hover:bg-[#1f8ad2] disabled:opacity-50 text-white py-2 px-4 text-[13px] font-medium cursor-pointer"
+                className="flex-1 anvil-btn anvil-btn-primary disabled:opacity-50 text-white py-2 px-4 text-[13px] font-medium cursor-pointer"
               >
                 {busy ? "Resetting..." : "Reset Password"}
               </button>

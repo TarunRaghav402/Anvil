@@ -126,9 +126,15 @@ export const UserProfileMenu: React.FC<UserProfileMenuProps> = ({
     if (tier === "admin") {
       return (
         <span
-          className={`inline-flex items-center gap-1 font-bold uppercase tracking-wider rounded-full bg-gradient-to-r from-[#d97706]/20 to-[#f59e0b]/20 border border-[#f59e0b]/50 text-[#fbbf24] shadow-xs ${
-            size === "sm" ? "text-[9px] px-1.5 py-0.2" : "text-[10px] px-2 py-0.5"
+          className={`anvil-poly-badge inline-flex items-center gap-1 font-bold uppercase tracking-wider text-[#fbbf24] ${
+            size === "sm" ? "text-[9px] px-2 py-0.5" : "text-[10px] px-2.5 py-0.5"
           }`}
+          style={
+            {
+              "--anvil-border": "rgba(245, 158, 11, 0.55)",
+              "--anvil-bg": "linear-gradient(135deg, rgba(217, 119, 6, 0.25), rgba(245, 158, 11, 0.14))",
+            } as React.CSSProperties
+          }
           title="Admin - Full Unlimited Workspace Access"
         >
           <Crown className={size === "sm" ? "w-2.5 h-2.5" : "w-3 h-3"} />
@@ -139,9 +145,15 @@ export const UserProfileMenu: React.FC<UserProfileMenuProps> = ({
     if (tier === "pro") {
       return (
         <span
-          className={`inline-flex items-center gap-1 font-bold uppercase tracking-wider rounded-full bg-gradient-to-r from-[#7c3aed]/20 to-[#a855f7]/20 border border-[#a855f7]/50 text-[#c084fc] shadow-xs ${
-            size === "sm" ? "text-[9px] px-1.5 py-0.2" : "text-[10px] px-2 py-0.5"
+          className={`anvil-poly-badge inline-flex items-center gap-1 font-bold uppercase tracking-wider text-[#c084fc] ${
+            size === "sm" ? "text-[9px] px-2 py-0.5" : "text-[10px] px-2.5 py-0.5"
           }`}
+          style={
+            {
+              "--anvil-border": "rgba(168, 85, 247, 0.55)",
+              "--anvil-bg": "linear-gradient(135deg, rgba(124, 58, 237, 0.25), rgba(168, 85, 247, 0.14))",
+            } as React.CSSProperties
+          }
           title="Pro Member"
         >
           <Zap className={size === "sm" ? "w-2.5 h-2.5" : "w-3 h-3"} />
@@ -151,8 +163,8 @@ export const UserProfileMenu: React.FC<UserProfileMenuProps> = ({
     }
     return (
       <span
-        className={`inline-flex items-center gap-1 font-medium uppercase tracking-wider rounded-full bg-[#333333] border border-[#444444] text-[#a3a3a3] ${
-          size === "sm" ? "text-[9px] px-1.5 py-0.2" : "text-[10px] px-2 py-0.5"
+        className={`anvil-poly-badge inline-flex items-center gap-1 font-medium uppercase tracking-wider text-[#a3a3a3] ${
+          size === "sm" ? "text-[9px] px-2 py-0.5" : "text-[10px] px-2.5 py-0.5"
         }`}
         title="Basic Plan"
       >
@@ -167,15 +179,24 @@ export const UserProfileMenu: React.FC<UserProfileMenuProps> = ({
         <button
           type="button"
           onClick={() => setDropdownOpen((prev) => !prev)}
-          className={`flex items-center gap-2 px-2 py-1 rounded transition-all duration-150 cursor-pointer ${
+          className={`anvil-btn anvil-btn-sm flex items-center gap-2 px-2.5 py-1 cursor-pointer ${
             dropdownOpen
-              ? "bg-[#37373d] text-white shadow-sm ring-1 ring-[#007acc]/40"
-              : "hover:bg-[#37373d]/70 text-[#cccccc] hover:text-white"
+              ? "anvil-btn-active text-white"
+              : "anvil-btn-ghost text-[#cccccc] hover:text-white"
           }`}
           title="Account & Profile"
         >
-          {/* Avatar Icon */}
-          <div className="w-5 h-5 rounded-full bg-gradient-to-tr from-[#007acc] to-[#4fc1ff] text-white font-mono text-[10px] font-bold flex items-center justify-center shadow-inner">
+          {/* Faceted Avatar Icon */}
+          <div
+            className="w-5 h-5 anvil-poly-badge text-white font-mono text-[10px] font-bold flex items-center justify-center"
+            style={
+              {
+                "--anvil-c": "4px",
+                "--anvil-border": "#4fc1ff",
+                "--anvil-bg": "linear-gradient(135deg, #279ff0 0%, #007acc 55%, #005b99 100%)",
+              } as React.CSSProperties
+            }
+          >
             {initials}
           </div>
 
@@ -197,10 +218,22 @@ export const UserProfileMenu: React.FC<UserProfileMenuProps> = ({
 
         {/* Dropdown Menu */}
         {dropdownOpen && (
-          <div className="absolute right-0 mt-1.5 w-60 bg-[#252526] border border-[#3c3c3c] shadow-2xl rounded-sm py-1 z-50 animate-in fade-in slide-in-from-top-1 duration-150">
+          <div
+            className="absolute right-0 mt-1.5 w-60 anvil-poly-frame shadow-2xl py-1 z-50 animate-in fade-in slide-in-from-top-1 duration-150"
+            style={{ "--anvil-c": "8px" } as React.CSSProperties}
+          >
             {/* Header snippet */}
             <div className="px-3.5 py-2.5 border-b border-[#333333] flex items-center gap-2.5 bg-[#2a2d2e]/40">
-              <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-[#007acc] to-[#4fc1ff] text-white font-mono text-xs font-bold flex items-center justify-center shrink-0">
+              <div
+                className="w-8 h-8 anvil-poly-badge text-white font-mono text-xs font-bold flex items-center justify-center shrink-0"
+                style={
+                  {
+                    "--anvil-c": "5px",
+                    "--anvil-border": "#4fc1ff",
+                    "--anvil-bg": "linear-gradient(135deg, #279ff0 0%, #007acc 55%, #005b99 100%)",
+                  } as React.CSSProperties
+                }
+              >
                 {initials}
               </div>
               <div className="min-w-0 flex-1">
@@ -259,7 +292,15 @@ export const UserProfileMenu: React.FC<UserProfileMenuProps> = ({
                   <span>Subscription & Plans</span>
                 </div>
                 {tier === "free" && (
-                  <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.2 rounded-full bg-[#7c3aed]/20 text-[#c084fc] border border-[#a855f7]/30">
+                  <span
+                    className="anvil-poly-badge text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 text-[#c084fc]"
+                    style={
+                      {
+                        "--anvil-border": "rgba(168, 85, 247, 0.45)",
+                        "--anvil-bg": "rgba(124, 58, 237, 0.22)",
+                      } as React.CSSProperties
+                    }
+                  >
                     $19/mo
                   </span>
                 )}
@@ -302,10 +343,10 @@ export const UserProfileMenu: React.FC<UserProfileMenuProps> = ({
 
       {/* Profile Details & Edit Modal */}
       {modalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-150">
-          <div className="w-full max-w-md bg-[#252526] border border-[#3c3c3c] shadow-2xl rounded-sm overflow-hidden flex flex-col">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/65 backdrop-blur-xs animate-in fade-in duration-150">
+          <div className="w-full max-w-md anvil-poly-frame shadow-2xl flex flex-col">
             {/* Modal Header */}
-            <div className="h-10 bg-[#333333] border-b border-[#3c3c3c] px-4 flex items-center justify-between">
+            <div className="h-10 bg-[#2d2e32]/90 border-b border-[#3c3c3c] px-4 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Shield className="w-4 h-4 text-[#007acc]" />
                 <span className="text-[13px] font-semibold text-white tracking-wide">
@@ -318,7 +359,7 @@ export const UserProfileMenu: React.FC<UserProfileMenuProps> = ({
                   setModalOpen(false);
                   setIsEditing(false);
                 }}
-                className="text-[#858585] hover:text-white p-1 hover:bg-[#3c3c3c] rounded transition-colors cursor-pointer"
+                className="anvil-btn anvil-btn-ghost text-[#858585] hover:text-white p-1 cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -327,22 +368,31 @@ export const UserProfileMenu: React.FC<UserProfileMenuProps> = ({
             {/* Modal Body */}
             <div className="p-6 space-y-4">
               {editSuccess && (
-                <div className="flex items-center gap-2 bg-[#1b3a2b] border border-[#2ea043] text-[#89d185] px-3 py-2 text-[12px] rounded-xs animate-in fade-in">
+                <div className="flex items-center gap-2 anvil-poly-card anvil-poly-card-success text-[#89d185] px-3 py-2 text-[12px] animate-in fade-in">
                   <Check className="w-4 h-4 shrink-0" />
                   <span>{editSuccess}</span>
                 </div>
               )}
 
               {editError && (
-                <div className="flex items-start gap-2 bg-[#5a1d1d] border border-[#be1100] text-[#f48771] px-3 py-2 text-[12px] rounded-xs animate-in fade-in">
+                <div className="flex items-start gap-2 anvil-poly-card anvil-poly-card-danger text-[#f48771] px-3 py-2 text-[12px] animate-in fade-in">
                   <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
                   <span>{editError}</span>
                 </div>
               )}
 
               {/* Profile Card Header */}
-              <div className="flex items-center gap-4 p-3.5 bg-[#1e1e1e] border border-[#333333] rounded">
-                <div className="w-14 h-14 rounded-full bg-gradient-to-tr from-[#007acc] to-[#4fc1ff] text-white font-mono text-xl font-bold flex items-center justify-center shadow-lg shrink-0">
+              <div className="flex items-center gap-4 p-3.5 anvil-poly-card">
+                <div
+                  className="w-14 h-14 anvil-poly-badge text-white font-mono text-xl font-bold flex items-center justify-center shadow-lg shrink-0"
+                  style={
+                    {
+                      "--anvil-c": "8px",
+                      "--anvil-border": "#4fc1ff",
+                      "--anvil-bg": "linear-gradient(135deg, #279ff0 0%, #007acc 55%, #005b99 100%)",
+                    } as React.CSSProperties
+                  }
+                >
                   {initials}
                 </div>
                 <div className="min-w-0 flex-1">
@@ -374,7 +424,7 @@ export const UserProfileMenu: React.FC<UserProfileMenuProps> = ({
                       value={editUsername}
                       onChange={(e) => setEditUsername(e.target.value)}
                       placeholder="Enter new username"
-                      className="w-full bg-[#1e1e1e] border border-[#3c3c3c] focus:border-[#007acc] focus:ring-1 focus:ring-[#007acc] focus:outline-none px-3.5 py-2 text-[13px] text-white rounded-xs font-mono transition-colors"
+                      className="w-full bg-[#1e1e1e] border border-[#3c3c3c] focus:border-[#007acc] focus:ring-1 focus:ring-[#007acc] focus:outline-none px-3.5 py-2 text-[13px] text-white font-mono transition-colors"
                     />
                     <span className="text-[10px] text-[#858585] mt-1 block">
                       Syncs across Firebase Authentication and PostgreSQL database.
@@ -395,7 +445,7 @@ export const UserProfileMenu: React.FC<UserProfileMenuProps> = ({
                       readOnly
                       disabled
                       value={user.email}
-                      className="w-full bg-[#2a2a2a]/60 border border-[#333333] px-3.5 py-2 text-[13px] text-[#888888] rounded-xs font-mono cursor-not-allowed select-none"
+                      className="w-full bg-[#2a2a2a]/60 border border-[#333333] px-3.5 py-2 text-[13px] text-[#888888] font-mono cursor-not-allowed select-none"
                     />
                   </div>
 
@@ -406,7 +456,7 @@ export const UserProfileMenu: React.FC<UserProfileMenuProps> = ({
                     <select
                       value={editRole}
                       onChange={(e) => setEditRole(e.target.value)}
-                      className="w-full bg-[#1e1e1e] border border-[#3c3c3c] focus:border-[#007acc] focus:ring-1 focus:ring-[#007acc] focus:outline-none px-3.5 py-2 text-[13px] text-white rounded-xs font-sans transition-colors cursor-pointer"
+                      className="w-full bg-[#1e1e1e] border border-[#3c3c3c] focus:border-[#007acc] focus:ring-1 focus:ring-[#007acc] focus:outline-none px-3.5 py-2 text-[13px] text-white font-sans transition-colors cursor-pointer"
                     >
                       <option value="Lead Developer">Lead Developer</option>
                       <option value="Developer">Developer</option>
@@ -422,7 +472,7 @@ export const UserProfileMenu: React.FC<UserProfileMenuProps> = ({
                     <label className="block text-[11px] uppercase tracking-wider font-semibold text-[#858585] mb-1">
                       Account Tier / Status
                     </label>
-                    <div className="p-2.5 bg-[#1e1e1e] border border-[#333333] rounded-xs flex items-center justify-between text-[12px]">
+                    <div className="p-2.5 anvil-poly-card flex items-center justify-between text-[12px]">
                       <span className="text-[#cccccc]">{tier === "admin" ? "Master Admin" : tier === "pro" ? "Pro Member ($19/mo)" : "Free Member"}</span>
                       <div className="flex items-center gap-2">
                         {renderTierBadge("sm")}
@@ -445,7 +495,7 @@ export const UserProfileMenu: React.FC<UserProfileMenuProps> = ({
                     <button
                       type="submit"
                       disabled={saving}
-                      className="flex-1 bg-[#007acc] hover:bg-[#1f8ad2] disabled:opacity-50 text-white py-2 px-3 text-[13px] font-medium rounded-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-xs active:scale-98"
+                      className="flex-1 anvil-btn anvil-btn-primary disabled:opacity-50 text-white py-2 px-3 text-[13px] font-medium flex items-center justify-center gap-1.5 cursor-pointer"
                     >
                       <Save className="w-3.5 h-3.5" />
                       {saving ? "Saving to Firebase..." : "Save Changes"}
@@ -458,7 +508,7 @@ export const UserProfileMenu: React.FC<UserProfileMenuProps> = ({
                         setEditUsername(user.username);
                         setEditError(null);
                       }}
-                      className="bg-[#2d2d2d] hover:bg-[#3c3c3c] text-[#cccccc] hover:text-white py-2 px-3 text-[13px] rounded-xs transition-colors cursor-pointer"
+                      className="anvil-btn anvil-btn-secondary text-[#cccccc] hover:text-white py-2 px-3.5 text-[13px] cursor-pointer"
                     >
                       Cancel
                     </button>
@@ -467,7 +517,7 @@ export const UserProfileMenu: React.FC<UserProfileMenuProps> = ({
               ) : (
                 <div className="space-y-4">
                   {/* Account Details Grid */}
-                  <div className="space-y-3 bg-[#1e1e1e] p-3.5 border border-[#333333] rounded text-[12px]">
+                  <div className="space-y-3 anvil-poly-card p-3.5 text-[12px]">
                     <div className="flex items-center justify-between py-1 border-b border-[#2d2d2d]">
                       <span className="text-[#858585]">Unique UID</span>
                       <div className="flex items-center gap-1.5 font-mono text-[#cccccc]">
@@ -475,7 +525,7 @@ export const UserProfileMenu: React.FC<UserProfileMenuProps> = ({
                         <button
                           type="button"
                           onClick={copyUserId}
-                          className="p-1 hover:bg-[#333333] rounded text-[#858585] hover:text-white cursor-pointer"
+                          className="anvil-btn anvil-btn-ghost p-1 text-[#858585] hover:text-white cursor-pointer"
                           title="Copy UID"
                         >
                           {copiedId ? (
@@ -534,7 +584,7 @@ export const UserProfileMenu: React.FC<UserProfileMenuProps> = ({
                       setIsEditing(true);
                       setEditError(null);
                     }}
-                    className="w-full bg-[#2a2d2e] hover:bg-[#37373d] border border-[#3c3c3c] text-white py-2 px-3 text-[12px] font-medium rounded-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                    className="w-full anvil-btn anvil-btn-secondary text-white py-2 px-3 text-[12px] font-medium flex items-center justify-center gap-1.5 cursor-pointer"
                   >
                     <Edit2 className="w-3.5 h-3.5 text-[#007acc]" />
                     Edit Profile Details
@@ -543,8 +593,8 @@ export const UserProfileMenu: React.FC<UserProfileMenuProps> = ({
               )}
 
               {/* Status Note */}
-              <div className="text-[11px] text-[#858585] bg-[#1a232e] border border-[#007acc]/30 p-2.5 rounded flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-[#89d185] animate-pulse shrink-0" />
+              <div className="text-[11px] text-[#858585] anvil-poly-card anvil-poly-card-cobalt p-2.5 flex items-center gap-2">
+                <div className="w-2 h-2 rotate-45 bg-[#89d185] animate-pulse shrink-0" />
                 <span>
                   Persistent Firebase Authentication session active on this device.
                 </span>
@@ -559,7 +609,7 @@ export const UserProfileMenu: React.FC<UserProfileMenuProps> = ({
                   setModalOpen(false);
                   await onSignOut();
                 }}
-                className="flex items-center gap-1.5 text-[12px] text-[#f48771] hover:text-white px-3 py-1.5 rounded hover:bg-[#722020] transition-colors cursor-pointer"
+                className="anvil-btn anvil-btn-sm anvil-btn-danger flex items-center gap-1.5 text-[12px] text-[#f48771] hover:text-white px-3 py-1.5 cursor-pointer"
               >
                 <LogOut className="w-3.5 h-3.5" />
                 Sign Out
@@ -571,7 +621,7 @@ export const UserProfileMenu: React.FC<UserProfileMenuProps> = ({
                   setModalOpen(false);
                   setIsEditing(false);
                 }}
-                className="bg-[#2d2d2d] hover:bg-[#3c3c3c] text-white px-4 py-1.5 text-[12px] font-medium rounded transition-colors cursor-pointer"
+                className="anvil-btn anvil-btn-sm anvil-btn-secondary text-white px-4 py-1.5 text-[12px] font-medium cursor-pointer"
               >
                 Close
               </button>

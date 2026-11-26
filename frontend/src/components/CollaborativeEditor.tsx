@@ -391,7 +391,7 @@ export const CollaborativeEditor: React.FC<CollaborativeEditorProps> = ({
                   type="button"
                   onClick={() => setZoom((z) => Math.max(0.25, Number((z - 0.25).toFixed(2))))}
                   title="Zoom Out"
-                  className="p-1 bg-[#3c3c3c] hover:bg-[#4c4c4c] text-[#cccccc] cursor-pointer"
+                  className="anvil-btn anvil-btn-sm anvil-btn-secondary p-1 text-[#cccccc] hover:text-white cursor-pointer"
                 >
                   <ZoomOut className="w-3.5 h-3.5" />
                 </button>
@@ -402,7 +402,7 @@ export const CollaborativeEditor: React.FC<CollaborativeEditorProps> = ({
                   type="button"
                   onClick={() => setZoom((z) => Math.min(8, Number((z + 0.25).toFixed(2))))}
                   title="Zoom In"
-                  className="p-1 bg-[#3c3c3c] hover:bg-[#4c4c4c] text-[#cccccc] cursor-pointer"
+                  className="anvil-btn anvil-btn-sm anvil-btn-secondary p-1 text-[#cccccc] hover:text-white cursor-pointer"
                 >
                   <ZoomIn className="w-3.5 h-3.5" />
                 </button>
@@ -410,17 +410,17 @@ export const CollaborativeEditor: React.FC<CollaborativeEditorProps> = ({
                   type="button"
                   onClick={() => setZoom(1)}
                   title="Reset Zoom"
-                  className="p-1 bg-[#3c3c3c] hover:bg-[#4c4c4c] text-[#cccccc] cursor-pointer"
+                  className="anvil-btn anvil-btn-sm anvil-btn-secondary p-1 text-[#cccccc] hover:text-white cursor-pointer"
                 >
                   <RotateCcw className="w-3.5 h-3.5" />
                 </button>
                 <button
                   type="button"
                   onClick={() => setCheckerboard((c) => !c)}
-                  className={`px-2 py-1 text-[11px] flex items-center gap-1 border cursor-pointer ${
+                  className={`anvil-btn anvil-btn-sm px-2.5 py-1 text-[11px] flex items-center gap-1 cursor-pointer ${
                     checkerboard
-                      ? "bg-[#094771] border-[#007acc] text-white"
-                      : "bg-[#3c3c3c] border-[#3c3c3c] text-[#cccccc]"
+                      ? "anvil-btn-active text-white"
+                      : "anvil-btn-secondary text-[#cccccc]"
                   }`}
                 >
                   <Grid className="w-3 h-3" />
@@ -431,7 +431,7 @@ export const CollaborativeEditor: React.FC<CollaborativeEditorProps> = ({
             <button
               type="button"
               onClick={() => onRequestPinComment(node.id, null)}
-              className="px-2 py-1 bg-[#007acc] hover:bg-[#1f8ad2] text-white text-[11px] flex items-center gap-1 cursor-pointer"
+              className="anvil-btn anvil-btn-sm anvil-btn-primary px-2.5 py-1 text-white text-[11px] flex items-center gap-1 cursor-pointer"
             >
               <MessageSquarePlus className="w-3.5 h-3.5" />
               Pin Comment
@@ -467,7 +467,7 @@ export const CollaborativeEditor: React.FC<CollaborativeEditorProps> = ({
           )}
 
           {assetUrl && isAudioFile(node.name) && (
-            <div className="w-full max-w-md bg-[#252526] border border-[#3c3c3c] p-5 space-y-4">
+            <div className="w-full max-w-md anvil-poly-frame p-5 space-y-4">
               <div className="text-[13px] font-medium text-white font-mono truncate">
                 {node.name}
               </div>
@@ -493,7 +493,7 @@ export const CollaborativeEditor: React.FC<CollaborativeEditorProps> = ({
                       setPlaying(true);
                     }
                   }}
-                  className="bg-[#007acc] hover:bg-[#1f8ad2] text-white p-2 cursor-pointer"
+                  className="anvil-btn anvil-btn-sm anvil-btn-primary text-white p-2 cursor-pointer"
                 >
                   {playing ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
                 </button>
@@ -521,7 +521,7 @@ export const CollaborativeEditor: React.FC<CollaborativeEditorProps> = ({
                 <button
                   type="button"
                   onClick={() => setMuted((m) => !m)}
-                  className="p-1.5 bg-[#3c3c3c] hover:bg-[#4c4c4c] text-[#cccccc] cursor-pointer"
+                  className="anvil-btn anvil-btn-sm anvil-btn-secondary p-1.5 text-[#cccccc] hover:text-white cursor-pointer"
                 >
                   {muted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
                 </button>
@@ -531,7 +531,7 @@ export const CollaborativeEditor: React.FC<CollaborativeEditorProps> = ({
 
           {assetUrl && isFontFile(node.name) && (
             <div
-              className="max-w-xl bg-[#252526] border border-[#3c3c3c] p-6 space-y-4 text-white"
+              className="max-w-xl anvil-poly-frame p-6 space-y-4 text-white"
               style={{ fontFamily: fontFamilyName ?? "inherit" }}
             >
               <div className="text-[11px] font-sans uppercase tracking-wider text-[#858585]">

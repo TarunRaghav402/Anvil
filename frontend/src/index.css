@@ -261,6 +261,291 @@ pre,
   animation: anvilProgressFill 2100ms cubic-bezier(0.25, 0.9, 0.35, 1) forwards;
 }
 
+/* ============================================================================
+   Anvil Subtle Low-Poly Architectural System (~20% Sculpted Facet Aesthetic)
+   Crisp 45° chamfered corners, dual-plane diagonal facets, razor-sharp 1px
+   continuous perimeter bevels matching VS Code Dark+ clarity.
+   ============================================================================ */
+@layer components {
+  .anvil-poly-frame {
+    --anvil-c: 10px;
+    --anvil-border: #3c3c3c;
+    --anvil-bg: linear-gradient(148deg, #292a2d 0%, #252526 51.8%, #212224 52.4%, #242527 100%);
+    position: relative;
+    isolation: isolate;
+    background: var(--anvil-border);
+    clip-path: polygon(
+      var(--anvil-c) 0,
+      100% 0,
+      100% calc(100% - var(--anvil-c)),
+      calc(100% - var(--anvil-c)) 100%,
+      0 100%,
+      0 var(--anvil-c)
+    );
+    transition: background-color 160ms ease, transform 160ms ease;
+  }
+
+  .anvil-poly-frame::before {
+    content: "";
+    position: absolute;
+    inset: 1px;
+    z-index: -1;
+    pointer-events: none;
+    background: var(--anvil-bg);
+    clip-path: polygon(
+      calc(var(--anvil-c) - 0.6px) 0,
+      100% 0,
+      100% calc(100% - var(--anvil-c) + 0.6px),
+      calc(100% - var(--anvil-c) + 0.6px) 100%,
+      0 100%,
+      0 calc(var(--anvil-c) - 0.6px)
+    );
+  }
+
+  .anvil-poly-frame-hover:hover {
+    --anvil-border: #4f6478;
+  }
+
+  .anvil-poly-card {
+    --anvil-c: 7px;
+    --anvil-border: #363639;
+    --anvil-bg: linear-gradient(152deg, #212225 0%, #1e1e1e 50.8%, #1a1b1d 51.3%, #1e1e20 100%);
+    position: relative;
+    isolation: isolate;
+    background: var(--anvil-border);
+    clip-path: polygon(
+      var(--anvil-c) 0,
+      100% 0,
+      100% calc(100% - var(--anvil-c)),
+      calc(100% - var(--anvil-c)) 100%,
+      0 100%,
+      0 var(--anvil-c)
+    );
+    transition: background-color 160ms ease, transform 160ms ease;
+  }
+
+  .anvil-poly-card::before {
+    content: "";
+    position: absolute;
+    inset: 1px;
+    z-index: -1;
+    pointer-events: none;
+    background: var(--anvil-bg);
+    clip-path: polygon(
+      calc(var(--anvil-c) - 0.6px) 0,
+      100% 0,
+      100% calc(100% - var(--anvil-c) + 0.6px),
+      calc(100% - var(--anvil-c) + 0.6px) 100%,
+      0 100%,
+      0 calc(var(--anvil-c) - 0.6px)
+    );
+  }
+
+  .anvil-poly-card-cobalt {
+    --anvil-border: #007acc;
+    --anvil-bg: linear-gradient(152deg, #212932 0%, #1d232a 50.8%, #191f26 51.3%, #1c232b 100%);
+  }
+
+  .anvil-poly-card-pro {
+    --anvil-border: #9333ea;
+    --anvil-bg: linear-gradient(152deg, #29203a 0%, #221b30 50.8%, #1d1728 51.3%, #221b2f 100%);
+  }
+
+  .anvil-poly-card-pro-idle {
+    --anvil-border: rgba(124, 58, 237, 0.52);
+    --anvil-bg: linear-gradient(152deg, #231e30 0%, #1f1c28 50.8%, #1b1921 51.3%, #1e1b24 100%);
+  }
+
+  .anvil-poly-card-pro-idle:hover {
+    --anvil-border: #a855f7;
+  }
+
+  .anvil-poly-card-gold {
+    --anvil-border: rgba(245, 158, 11, 0.45);
+    --anvil-bg: linear-gradient(148deg, rgba(217, 119, 6, 0.16) 0%, rgba(245, 158, 11, 0.08) 55%, rgba(28, 24, 18, 0.9) 100%);
+  }
+
+  .anvil-poly-card-danger {
+    --anvil-border: #be1100;
+    --anvil-bg: linear-gradient(152deg, #622121 0%, #5a1d1d 51%, #4f1818 51.5%, #581c1c 100%);
+  }
+
+  .anvil-poly-card-success {
+    --anvil-border: #2ea043;
+    --anvil-bg: linear-gradient(152deg, #1f4231 0%, #1b3a2b 51%, #173225 51.5%, #1a3829 100%);
+  }
+
+  .anvil-poly-card-warning {
+    --anvil-border: #cca700;
+    --anvil-bg: linear-gradient(152deg, #42331f 0%, #3a2d1b 51%, #332717 51.5%, #382b1a 100%);
+  }
+
+  /* Base Low-Poly Chamfered Button */
+  .anvil-btn {
+    --anvil-c: 6px;
+    --anvil-border: #48484e;
+    --anvil-bg: linear-gradient(138deg, #34353a 0%, #2e2f33 49.5%, #28292c 50.2%, #2c2d31 100%);
+    position: relative;
+    isolation: isolate;
+    background: var(--anvil-border);
+    clip-path: polygon(
+      var(--anvil-c) 0,
+      100% 0,
+      100% calc(100% - var(--anvil-c)),
+      calc(100% - var(--anvil-c)) 100%,
+      0 100%,
+      0 var(--anvil-c)
+    );
+    transition: transform 130ms cubic-bezier(0.22, 1, 0.36, 1), background-color 140ms ease, opacity 140ms ease;
+  }
+
+  .anvil-btn::before {
+    content: "";
+    position: absolute;
+    inset: 1px;
+    z-index: -1;
+    pointer-events: none;
+    background: var(--anvil-bg);
+    clip-path: polygon(
+      calc(var(--anvil-c) - 0.6px) 0,
+      100% 0,
+      100% calc(100% - var(--anvil-c) + 0.6px),
+      calc(100% - var(--anvil-c) + 0.6px) 100%,
+      0 100%,
+      0 calc(var(--anvil-c) - 0.6px)
+    );
+    transition: filter 140ms ease;
+  }
+
+  .anvil-btn:hover:not(:disabled) {
+    transform: translateY(-0.5px);
+  }
+
+  .anvil-btn:hover:not(:disabled)::before {
+    filter: brightness(1.1);
+  }
+
+  .anvil-btn:active:not(:disabled) {
+    transform: translateY(0.5px) scale(0.985);
+  }
+
+  .anvil-btn:focus-visible {
+    outline: none;
+    --anvil-border: #4fc1ff;
+  }
+
+  .anvil-btn-sm {
+    --anvil-c: 4px;
+  }
+
+  .anvil-btn-md {
+    --anvil-c: 6px;
+  }
+
+  /* Primary Forge Cobalt */
+  .anvil-btn-primary {
+    --anvil-border: #2698e6;
+    --anvil-bg: linear-gradient(138deg, #148ce0 0%, #007acc 49.5%, #006ab3 50.2%, #0074c4 100%);
+  }
+
+  .anvil-btn-primary:hover:not(:disabled) {
+    --anvil-border: #4fc1ff;
+  }
+
+  /* Pro Forge Amethyst */
+  .anvil-btn-pro {
+    --anvil-border: #b67eff;
+    --anvil-bg: linear-gradient(138deg, #8b5cf6 0%, #7c3aed 49.5%, #6d28d9 50.2%, #7c3aed 100%);
+  }
+
+  .anvil-btn-pro:hover:not(:disabled) {
+    --anvil-border: #d8b4fe;
+  }
+
+  /* Machined Steel Secondary */
+  .anvil-btn-secondary {
+    --anvil-border: #46464c;
+    --anvil-bg: linear-gradient(138deg, #333438 0%, #2d2d30 49.5%, #27272a 50.2%, #2b2c2f 100%);
+  }
+
+  .anvil-btn-secondary:hover:not(:disabled) {
+    --anvil-border: #606068;
+  }
+
+  /* Ghost / Toolbar Toggle */
+  .anvil-btn-ghost {
+    --anvil-c: 4px;
+    --anvil-border: transparent;
+    --anvil-bg: transparent;
+  }
+
+  .anvil-btn-ghost:hover:not(:disabled) {
+    --anvil-border: #4a4a50;
+    --anvil-bg: linear-gradient(138deg, #37373d 0%, #323236 50%, #2c2d30 100%);
+  }
+
+  /* Active Cobalt Pill Button */
+  .anvil-btn-active {
+    --anvil-border: #007acc;
+    --anvil-bg: linear-gradient(138deg, #0b568a 0%, #094771 50%, #083d61 100%);
+  }
+
+  .anvil-btn-active:hover:not(:disabled) {
+    --anvil-border: #38bdf8;
+  }
+
+  /* Emerald Verify / Success */
+  .anvil-btn-success {
+    --anvil-border: #3fb950;
+    --anvil-bg: linear-gradient(138deg, #34b24d 0%, #2ea043 49.5%, #278a39 50.2%, #2c9840 100%);
+  }
+
+  /* Forged Crimson Danger */
+  .anvil-btn-danger {
+    --anvil-border: #be1100;
+    --anvil-bg: linear-gradient(138deg, #6b2424 0%, #5a1d1d 49.5%, #4d1717 50.2%, #571b1b 100%);
+  }
+
+  .anvil-btn-danger:hover:not(:disabled) {
+    --anvil-border: #f48771;
+  }
+
+  /* Faceted Badges & Status Chips */
+  .anvil-poly-badge {
+    --anvil-c: 4px;
+    --anvil-border: #46464c;
+    --anvil-bg: #2e2e32;
+    position: relative;
+    isolation: isolate;
+    background: var(--anvil-border);
+    clip-path: polygon(
+      var(--anvil-c) 0,
+      100% 0,
+      100% calc(100% - var(--anvil-c)),
+      calc(100% - var(--anvil-c)) 100%,
+      0 100%,
+      0 var(--anvil-c)
+    );
+  }
+
+  .anvil-poly-badge::before {
+    content: "";
+    position: absolute;
+    inset: 1px;
+    z-index: -1;
+    pointer-events: none;
+    background: var(--anvil-bg);
+    clip-path: polygon(
+      calc(var(--anvil-c) - 0.6px) 0,
+      100% 0,
+      100% calc(100% - var(--anvil-c) + 0.6px),
+      calc(100% - var(--anvil-c) + 0.6px) 100%,
+      0 100%,
+      0 calc(var(--anvil-c) - 0.6px)
+    );
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .anvil-hammer-arm,
   .anvil-body-recoil,

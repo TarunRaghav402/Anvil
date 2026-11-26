@@ -17,9 +17,65 @@ interface WebKitWindow {
   webkitAudioContext?: typeof AudioContext;
 }
 
+/**
+ * Generates an in-memory 16-bit PCM WAV data URI for a metallic anvil strike fallback.
+ */
+export function buildAnvilStrikeWavDataUri(baseFreqHz = 660, durationSec = 1.1): string {
+  const sampleRate = 22050;
+  const numSamples = Math.floor(sampleRate * durationSec);
+  const dataSize = numSamples * 2;
+  const buf = new ArrayBuffer(44 + dataSize);
+  const view = new DataView(buf);
+
+  const writeStr = (offset: number, s: string) => {
+    for (let i = 0; i < s.length; i++) {
+      view.setUint8(offset + i, s.charCodeAt(i));
+    }
+  };
+
+  writeStr(0, "RIFF");
+  view.setUint32(4, 36 + dataSize, true);
+  writeStr(8, "WAVE");
+  writeStr(12, "fmt ");
+  view.setUint32(16, 16, true);
+  view.setUint16(20, 1, true); // PCM
+  view.setUint16(22, 1, true); // Mono
+  view.setUint32(24, sampleRate, true);
+  view.setUint32(28, sampleRate * 2, true);
+  view.setUint16(32, 2, true);
+  view.setUint16(34, 16, true);
+  writeStr(36, "data");
+  view.setUint32(40, dataSize, true);
+
+  for (let i = 0; i < numSamples; i++) {
+    const t = i / sampleRate;
+    // Fast initial transient + pitch-dropping body + inharmonic metallic ring
+    const noiseEnv = t < 0.03 ? Math.exp(-t / 0.008) * Math.sin(2 * Math.PI * 4100 * t) * 0.28 : 0;
+    const body = Math.exp(-t / 0.032) * Math.sin(2 * Math.PI * (60 + 120 * Math.exp(-t / 0.02)) * t) * 0.35;
+    let ring = 0;
+    for (const p of ANVIL_RING_PARTIALS) {
+      ring += Math.exp(-t / (p.decaySec * 0.5)) * Math.sin(2 * Math.PI * (baseFreqHz * p.ratio + p.detuneHz) * t) * p.gain;
+    }
+    const sample = Math.max(-1, Math.min(1, (noiseEnv + body + ring) * 0.72));
+    view.setInt16(44 + i * 2, Math.round(sample * 32767), true);
+  }
+
+  const bytes = new Uint8Array(buf);
+  let binary = "";
+  const chunkSize = 0x8000;
+  for (let i = 0; i < bytes.length; i += chunkSize) {
+    binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize));
+  }
+  if (typeof btoa === "function") {
+    return `data:audio/wav;base64,${btoa(binary)}`;
+  }
+  return `data:audio/wav;base64,${Buffer.from(bytes).toString("base64")}`;
+}
+
 class AnvilSoundEngine {
   private ctx: AudioContext | null = null;
   private noiseBuffer: AudioBuffer | null = null;
+  private wavCache = new Map<number, string>();
 
   private getAudioContextClass(): typeof AudioContext | null {
     if (typeof window === "undefined") return null;
@@ -59,37 +115,55 @@ class AnvilSoundEngine {
     return this.ctx?.state === "running";
   }
 
-  public async unlock(): Promise<boolean> {
+  public async unlock(timeoutMs = 25): Promise<boolean> {
     const ctx = this.ensureContext();
     if (!ctx) return false;
+    if (ctx.state === "running") return true;
     if (ctx.state === "suspended") {
+      let timerId: ReturnType<typeof setTimeout> | undefined;
       try {
-        await ctx.resume();
+        await Promise.race([
+          ctx.resume(),
+          new Promise<void>((resolve) => {
+            timerId = setTimeout(resolve, timeoutMs);
+          }),
+        ]);
       } catch {
         return false;
+      } finally {
+        if (timerId !== undefined) clearTimeout(timerId);
       }
     }
-    return ctx.state === "running";
+    return (ctx.state as AudioContextState) === "running";
+  }
+
+  private async playHtmlAudioFallback(baseFreqHz: number, intensity: number): Promise<boolean> {
+    if (typeof Audio === "undefined") return false;
+    try {
+      let src = this.wavCache.get(baseFreqHz);
+      if (!src) {
+        src = buildAnvilStrikeWavDataUri(baseFreqHz);
+        this.wavCache.set(baseFreqHz, src);
+      }
+      const audio = new Audio(src);
+      audio.volume = Math.min(1, Math.max(0.15, 0.75 * intensity));
+      await audio.play();
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   public async playStrike(options?: { intensity?: number; baseFreqHz?: number }): Promise<boolean> {
-    const ctx = this.ensureContext();
-    if (!ctx) return false;
-
-    if (ctx.state === "suspended") {
-      try {
-        await ctx.resume();
-      } catch {
-        return false;
-      }
-    }
-
-    if (ctx.state !== "running") {
-      return false;
-    }
-
     const intensity = Math.min(1.2, Math.max(0.2, options?.intensity ?? 1.0));
     const baseFreq = options?.baseFreqHz ?? 660;
+
+    const ready = await this.unlock(25);
+    const ctx = this.ctx;
+    if (!ready || !ctx || (ctx.state as AudioContextState) !== "running") {
+      return this.playHtmlAudioFallback(baseFreq, intensity);
+    }
+
     const now = ctx.currentTime;
 
     // Dynamics compressor prevents harsh clipping while preserving crisp attack

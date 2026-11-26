@@ -369,7 +369,7 @@ export const ExplorerSidebar: React.FC<ExplorerSidebarProps> = ({
             type="button"
             title="New File"
             onClick={() => startCreate(selectedFolderId, "text_file")}
-            className="p-1 hover:bg-[#3c3c3c] text-[#cccccc] cursor-pointer"
+            className="anvil-btn anvil-btn-ghost p-1 text-[#cccccc] hover:text-white cursor-pointer"
           >
             <FilePlus className="w-3.5 h-3.5" />
           </button>
@@ -377,7 +377,7 @@ export const ExplorerSidebar: React.FC<ExplorerSidebarProps> = ({
             type="button"
             title="New Folder"
             onClick={() => startCreate(selectedFolderId, "folder")}
-            className="p-1 hover:bg-[#3c3c3c] text-[#cccccc] cursor-pointer"
+            className="anvil-btn anvil-btn-ghost p-1 text-[#cccccc] hover:text-white cursor-pointer"
           >
             <FolderPlus className="w-3.5 h-3.5" />
           </button>
@@ -385,7 +385,7 @@ export const ExplorerSidebar: React.FC<ExplorerSidebarProps> = ({
             type="button"
             title="Upload Assets"
             onClick={() => triggerUploadDialog(selectedFolderId)}
-            className="p-1 hover:bg-[#3c3c3c] text-[#cccccc] cursor-pointer"
+            className="anvil-btn anvil-btn-ghost p-1 text-[#cccccc] hover:text-white cursor-pointer"
           >
             <Upload className="w-3.5 h-3.5" />
           </button>
@@ -393,7 +393,7 @@ export const ExplorerSidebar: React.FC<ExplorerSidebarProps> = ({
             type="button"
             title="Refresh Explorer"
             onClick={() => void onRefresh()}
-            className="p-1 hover:bg-[#3c3c3c] text-[#cccccc] cursor-pointer"
+            className="anvil-btn anvil-btn-ghost p-1 text-[#cccccc] hover:text-white cursor-pointer"
           >
             <RefreshCw className="w-3.5 h-3.5" />
           </button>
@@ -436,8 +436,8 @@ export const ExplorerSidebar: React.FC<ExplorerSidebarProps> = ({
 
       {contextMenu && (
         <div
-          style={{ left: contextMenu.x, top: contextMenu.y }}
-          className="fixed z-50 w-40 bg-[#252526] border border-[#454545] shadow-lg py-1 text-[12px] text-[#cccccc]"
+          style={{ left: contextMenu.x, top: contextMenu.y, "--anvil-c": "6px" } as React.CSSProperties}
+          className="fixed z-50 w-40 anvil-poly-frame shadow-lg py-1 text-[12px] text-[#cccccc]"
           onClick={(e) => e.stopPropagation()}
         >
           <button

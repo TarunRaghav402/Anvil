@@ -127,10 +127,10 @@ export const CommentsView: React.FC<CommentsViewProps> = ({
               key={key}
               type="button"
               onClick={() => setFilter(key)}
-              className={`px-2 py-0.5 cursor-pointer ${
+              className={`anvil-btn anvil-btn-sm px-2.5 py-0.5 cursor-pointer ${
                 filter === key
-                  ? "bg-[#007acc] text-white"
-                  : "bg-[#333333] text-[#9d9d9d] hover:text-white"
+                  ? "anvil-btn-primary text-white"
+                  : "anvil-btn-secondary text-[#9d9d9d] hover:text-white"
               }`}
             >
               {label}
@@ -163,7 +163,7 @@ export const CommentsView: React.FC<CommentsViewProps> = ({
             <button
               type="submit"
               disabled={busy || !newBody.trim()}
-              className="bg-[#007acc] hover:bg-[#1f8ad2] disabled:opacity-50 text-white px-2.5 py-0.5 text-[11px] flex items-center gap-1 cursor-pointer"
+              className="anvil-btn anvil-btn-sm anvil-btn-primary disabled:opacity-50 text-white px-2.5 py-0.5 text-[11px] flex items-center gap-1 cursor-pointer"
             >
               <Send className="w-3 h-3" />
               Pin
@@ -188,9 +188,10 @@ export const CommentsView: React.FC<CommentsViewProps> = ({
             return (
               <div
                 key={root.id}
-                className={`border border-[#3c3c3c] bg-[#252526] p-2.5 ${
+                className={`anvil-poly-card p-2.5 ${
                   root.resolved ? "opacity-65" : ""
                 }`}
+                style={{ "--anvil-c": "5px" } as React.CSSProperties}
               >
                 <div className="flex items-start justify-between gap-2">
                   <button
@@ -207,7 +208,10 @@ export const CommentsView: React.FC<CommentsViewProps> = ({
                         by <strong className="text-[#cccccc]">{root.author?.username ?? "Member"}</strong>
                       </span>
                       {root.resolved && (
-                        <span className="text-[10px] px-1.5 py-0 bg-[#1b3a2b] text-[#89d185] border border-[#2ea043]">
+                        <span
+                          className="anvil-poly-badge text-[10px] px-2 py-0 text-[#89d185]"
+                          style={{ "--anvil-border": "#2ea043", "--anvil-bg": "#1b3a2b" } as React.CSSProperties}
+                        >
                           Resolved
                         </span>
                       )}
@@ -219,7 +223,7 @@ export const CommentsView: React.FC<CommentsViewProps> = ({
                       type="button"
                       onClick={() => void onToggleResolve(root.id, !root.resolved)}
                       title={root.resolved ? "Reopen thread" : "Resolve thread"}
-                      className="text-[11px] px-1.5 py-0.5 bg-[#333333] hover:bg-[#3c3c3c] text-[#cccccc] flex items-center gap-1 cursor-pointer"
+                      className="anvil-btn anvil-btn-sm anvil-btn-secondary text-[11px] px-2 py-0.5 text-[#cccccc] hover:text-white flex items-center gap-1 cursor-pointer"
                     >
                       {root.resolved ? (
                         <CheckCircle2 className="w-3 h-3 text-[#89d185]" />
@@ -232,7 +236,7 @@ export const CommentsView: React.FC<CommentsViewProps> = ({
                     <button
                       type="button"
                       onClick={() => setReplyingToId(replyingToId === root.id ? null : root.id)}
-                      className="text-[11px] px-1.5 py-0.5 bg-[#333333] hover:bg-[#3c3c3c] text-[#cccccc] cursor-pointer"
+                      className="anvil-btn anvil-btn-sm anvil-btn-secondary text-[11px] px-2 py-0.5 text-[#cccccc] hover:text-white cursor-pointer"
                     >
                       Reply
                     </button>
@@ -295,7 +299,7 @@ export const CommentsView: React.FC<CommentsViewProps> = ({
                     <button
                       type="submit"
                       disabled={busy || !replyBody.trim()}
-                      className="bg-[#007acc] hover:bg-[#1f8ad2] disabled:opacity-50 text-white px-2.5 py-1 text-[11px] cursor-pointer"
+                      className="anvil-btn anvil-btn-sm anvil-btn-primary disabled:opacity-50 text-white px-2.5 py-1 text-[11px] cursor-pointer"
                     >
                       Reply
                     </button>
